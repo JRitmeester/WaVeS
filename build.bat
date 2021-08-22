@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --specpath WaVeS/spec --distpath WaVeS/dist --workpath WaVeS/build --icon=icon.ico --paths=C:\Users\jeroe\Anaconda3\python.exe --hidden-import pystray_win32 volume_control.py
+pyinstaller --onefile --noconsole --specpath WaVeS/spec --distpath WaVeS/dist --workpath WaVeS/build --icon=icon.ico --hidden-import win32api main.py
