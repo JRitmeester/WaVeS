@@ -8,7 +8,7 @@ WaVeS is inspired by [Deej](https://github.com/omriharel/deej) and fulfills the 
 
 ## Installation
 
-The executable can be downloaded as-is. It will create a `mappings.txt` file in the same directory as where the executable was run. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
+The [executable](https://github.com/JRitmeester/WaVeS/releases/download/v1.0/WaVeSv1.0.exe) can be downloaded as-is. It will create a `mappings.txt` file in the same directory as where the executable was run. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
 * A specific application (`chrome.exe`, `spotify.exe`, games, etc.)
 * System volume
 * Unmapped (everything that does not have its own slider)
@@ -29,7 +29,7 @@ inverted:False  # Invert the volume
 ```
 
 ## Usage
-Upon running the executable, a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
+Upon running the [executable](https://github.com/JRitmeester/WaVeS/releases/download/v1.0/WaVeSv1.0.exe), a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
 
 
 ## Customisation
