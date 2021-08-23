@@ -20,8 +20,8 @@ An example of a config file (without comments) is:
 ```
 0: master
 1: system
-2: chrome.exe
-3: spotify.exe
+2: chrome.exe, isaac-ng.exe, spotify.exe
+3: discord.exe
 4: unmapped
 sliders: 5      # Number of sliders you have
 port:COM8       # COM port used for automatic detection
