@@ -26,6 +26,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         self.setContextMenu(menu)
 
         self.activated.connect(self.onClick)
+
         self.thread = VolumeThread()
 
     def std_err_post(self, msg):

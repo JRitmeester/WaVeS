@@ -90,13 +90,12 @@ if __name__ == "__main__":
     std_err_handler.err_msg.connect(tray_icon.std_err_post)
 
     # Errors that occur in the init phase aren't caught by the stderr.
-    tray_icon.show()
-    tray_icon.start_app()
-    # try:
-    #
-    # except Exception as e:
-    #     QMessageBox.critical(None, "Error during start-up", f"An error occurred during start-up:\n\n{traceback.format_exc()}")
-    #     logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
+    try:
+        tray_icon.show()
+        tray_icon.start_app()
+    except Exception as e:
+        QMessageBox.critical(None, "Error during start-up", f"An error occurred during start-up:\n\n{traceback.format_exc()}")
+        logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
     app.exec()
     print("This should not be printed.")
