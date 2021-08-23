@@ -149,8 +149,6 @@ class Control:
                 if len(active_sessions_in_group) > 0:
                     session_dict[idx] = SessionGroup(group_idx=idx, sessions=active_sessions_in_group)
 
-                print(f"List found: {', '.join(target)}.")
-
         if 'unmapped' in self.target_idxs.keys():
             unmapped_idx = self.target_idxs['unmapped']
             unmapped_sessions = [ses for ses in active_sessions.values() if ses not in mapped_sessions]

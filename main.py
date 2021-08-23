@@ -70,15 +70,17 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = QtWidgets.QWidget()
 
-    icon_dir = Path.cwd() / 'WaVeS/spec/icon.ico'
-    if icon_dir.is_file():
-        icon = QtGui.QIcon(str(icon_dir))
-        tray_icon = SystemTrayIcon(icon, w)
-    else:
+    icon_dir = Path.cwd() / 'WaVeS/spec/icon.ico'  # For testing the compiled version in the dist folder
+    if not icon_dir.is_file():
+        icon_dir = Path.cwd() / 'icon.ico'
+    if not icon_dir.is_file():
         QMessageBox.critical(None, "Icon not found", "Could not find the icon for the system tray. Please make sure "
                                                      "there is a file \"icon.ico\" in the same directory as the "
                                                      "executable.")
         sys.exit(0)
+
+    icon = QtGui.QIcon(str(icon_dir))
+    tray_icon = SystemTrayIcon(icon, w)
 
     # Create the stderr handler and point stderr to it
     std_err_handler = StdErrHandler()
