@@ -39,6 +39,9 @@ baudrate:9600
 
 # You can use this to invert the sliders: top is low volume, bottom is high volume.
 inverted:False
+
+# Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
+system in unmapped:True
 """
 
 class Control:

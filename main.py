@@ -75,7 +75,9 @@ if __name__ == "__main__":
         icon = QtGui.QIcon(str(icon_dir))
         tray_icon = SystemTrayIcon(icon, w)
     else:
-        raise RuntimeError(f"{icon_dir} could not be found.")
+        QMessageBox.critical(None, "Icon not found", "Could not find the icon for the system tray. Please make sure "
+                                                     "there is a file \"icon.ico\" in the same directory as the "
+                                                     "executable.")
 
     # Create the stderr handler and point stderr to it
     std_err_handler = StdErrHandler()
