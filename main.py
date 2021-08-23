@@ -78,6 +78,7 @@ if __name__ == "__main__":
         QMessageBox.critical(None, "Icon not found", "Could not find the icon for the system tray. Please make sure "
                                                      "there is a file \"icon.ico\" in the same directory as the "
                                                      "executable.")
+        sys.exit(0)
 
     # Create the stderr handler and point stderr to it
     std_err_handler = StdErrHandler()
