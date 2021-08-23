@@ -19,10 +19,10 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         # Setup the context menu when you right click the tray icon.
         menu = QtWidgets.QMenu(parent)
-        exit_ = menu.addAction("Exit")
-        exit_.triggered.connect(self.exit)
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.reload)
+        exit_ = menu.addAction("Exit")
+        exit_.triggered.connect(self.exit)
         self.setContextMenu(menu)
 
         self.activated.connect(self.onClick)

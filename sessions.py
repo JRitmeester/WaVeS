@@ -1,6 +1,8 @@
 from ctypes import cast, POINTER
+from typing import List
+
 from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
 
 
 class Session:
@@ -8,9 +10,9 @@ class Session:
     Contains the pycaw Session, the mapping index, the session name and the SimpleAudioVolume to get/set the volume.
     """
 
-    def __init__(self, idx: int, name: str = None, session=None):
-        self.session = session
+    def __init__(self, idx: int, session: AudioSession = None):
         self.idx = idx
+        self.session = session
         if session is not None and session.Process is not None:  # Filter out System sounds.
             self.name = session.Process.name()
             self.volume = self.session.SimpleAudioVolume
@@ -36,14 +38,22 @@ class SessionGroup:
     Contains the pycaw Session, the mapping index, the session name and the SimpleAudioVolume to get/set the volume.
     """
 
-    def __init__(self, sessions, idx: int, name: str):
-        self.sessions = [Session(idx, name, session) for session in sessions]
-        self.idx = idx
-        self.name = name
+    def __init__(self, group_idx: int, sessions: List[AudioSession]):
+        self.group_idx = group_idx
+        self.sessions = [Session(group_idx, session) for session in sessions]
 
     def __repr__(self):
-        return f"SessionGroup(name={self.name}, index={self.idx}, " \
+        return f"SessionGroup(index={self.group_idx}, " \
                f"sessions={[session.name for session in self.sessions]})"
+
+    def __contains__(self, item: AudioSession):
+        if type(item) == AudioSession:
+            return any([s.session == item for s in self.sessions])
+        elif type(item) == int:
+            return any([s.idx == item for s in self.sessions])
+
+    def add_session(self, session: AudioSession):
+        self.sessions.append(Session(self.group_idx, session))
 
     def set_volume(self, value):
         for session in self.sessions:
@@ -82,7 +92,11 @@ class Master(Session):
 
 class System(Session):
 
-    def __init__(self, session, idx: int):
-        super().__init__(idx=idx)
+    def __init__(self, idx: int, session):
+        super().__init__(idx=idx, session=session)
+        self.name = 'System Sounds'
+        self.session = session
         self.volume = session.SimpleAudioVolume
-        self.name = "System"
+
+    def __repr__(self):
+        return self.name

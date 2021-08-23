@@ -69,7 +69,13 @@ if __name__ == "__main__":
     ## APP STUFF
     app = QApplication(sys.argv)
     w = QtWidgets.QWidget()
-    tray_icon = SystemTrayIcon(QtGui.QIcon('icon.ico'), w)
+
+    icon_dir = Path.cwd() / 'WaVeS/spec/icon.ico'
+    if icon_dir.is_file():
+        icon = QtGui.QIcon(str(icon_dir))
+        tray_icon = SystemTrayIcon(icon, w)
+    else:
+        raise RuntimeError(f"{icon_dir} could not be found.")
 
     # Create the stderr handler and point stderr to it
     std_err_handler = StdErrHandler()
@@ -79,12 +85,14 @@ if __name__ == "__main__":
     std_err_handler.err_msg.connect(tray_icon.std_err_post)
 
     # Errors that occur in the init phase aren't caught by the stderr.
-    try:
-        tray_icon.show()
-        tray_icon.start_app()
-    except Exception as e:
-        QMessageBox.critical(None, "Error during start-up", f"An error occurred during start-up:\n\n{traceback.format_exc()}")
-        logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
+    tray_icon.show()
+    tray_icon.start_app()
+    # try:
+    #
+    # except Exception as e:
+    #     QMessageBox.critical(None, "Error during start-up", f"An error occurred during start-up:\n\n{traceback.format_exc()}")
+    #     logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
-    sys.exit(app.exec())
+    app.exec()
+    print("This should not be printed.")
 

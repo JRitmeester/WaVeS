@@ -4,7 +4,7 @@ from typing import Union
 from PyQt5.QtWidgets import QMessageBox
 from pycaw.pycaw import AudioUtilities
 from serial.tools import list_ports
-from session import SessionGroup, Master, Session, System
+from sessions import SessionGroup, Master, Session, System
 import webbrowser
 
 default_mapping_txt = """
@@ -75,18 +75,16 @@ class Control:
         self.inverted = self.get_setting("inverted") in ["True", "true"]
 
         self.get_mapping()
-        self.systray = None
-
-    def set_systray(self, systray):
-        self.systray = systray
 
     def load_config(self):
         self.lines = self.path.read_text().split('\n')
 
     def get_setting(self, text):
         """
-        Inner method that finds a line from the config file that contains "text".
-        :param text: Text that is to be found, like "port:" or "baudrate:"
+        Finds a line from the config file that contains "text".
+        E.g. get_setting("0") will get the application that is set to the first slider, and get_setting("port")
+        will get the port value from the config.
+        :param text: Text that is to be found, like "port" or "baudrate"
         :return: The first element in the config file that contains "text", if any.
         """
         setting = list(filter(lambda x: text + ":" in x, self.lines))[0]
@@ -94,39 +92,72 @@ class Control:
 
     def get_mapping(self):
         self.load_config()
-        self.mapping_dict = {}
+        self.target_idxs = {}
 
         # For each of the sliders, get the mapping from config.txt, if it exists, and create the mapping.
         for idx in range(self.sliders):
-            application = self.get_setting(str(idx))
-            self.mapping_dict[application] = int(idx)
+            application_str = self.get_setting(str(idx))    # Get the settings from the config for each index.
+            if ',' in application_str:
+                application_str = tuple(app.strip() for app in application_str.split(','))
+            self.target_idxs[application_str] = int(idx)    # Store the settings in a dictionary.
 
         session_dict = {}  # Look up table for the incoming Arduino data, mapping an index to a Session object.
         self.found_pycaw_sessions = AudioUtilities.GetAllSessions()
+
+        active_sessions = {session.Process.name().lower(): session
+                           for session in self.found_pycaw_sessions
+                           if session.Process is not None}
         mapped_sessions = []
+        system_session = [session for session in self.found_pycaw_sessions if 'SystemRoot' in session.DisplayName][0]
 
-        for session in self.found_pycaw_sessions:  # For each application with an audio session,
-            if session.Process is not None:  # If it has a process (System sounds doesn't, for example),
-                for application in self.mapping_dict:  # For each each of the currently mapped applications,
-                    if session.Process.name().lower() == application.lower():  # Check if this session is that app,
-                        session_dict[self.mapping_dict[application]] = Session(session=session,
-                                                                               idx=self.mapping_dict[application])
+        for target, idx in self.target_idxs.items():
+            if type(target) == str:
+                target = target.lower()
+                if target == 'master':
+                    session_dict[idx] = Master(idx=idx)
+
+                elif target == 'system':
+                    session_dict[idx] = System(idx=idx, session=system_session)
+                    mapped_sessions.append(system_session)
+
+                elif target != 'unmapped':  # Can be any application
+                    if target in active_sessions:
+                        session = active_sessions.get(target, None)
+                        if session is not None:
+                            session_dict[idx] = Session(idx, session)
                         mapped_sessions.append(session)
-            else:
-                # Act as if system sounds has been mapped to prevent issues down the line.
-                mapped_sessions.append(session)
-        self.unmapped = [session for session in self.found_pycaw_sessions if session not in mapped_sessions]
 
-        # Look for mapping of 'master' and 'unmapped'.
-        for application, idx in self.mapping_dict.items():
-            if application.lower() == 'master':
-                session_dict[idx] = Master(idx=idx)
+            elif type(target) == tuple:
+                active_sessions_in_group = []  # Track the sessions that are actually running and are mapped.
 
-            elif application.lower() == 'unmapped':
-                session_dict[idx] = SessionGroup(self.unmapped, idx, "Unmapped")
+                for target_app in target:
+                    target_app = target_app.lower()
 
-            elif application.lower() == 'system':
-                session_dict[idx] = System(session=self.found_pycaw_sessions[0], idx=idx)
+                    # Exclude the other categories. Might change in the future.
+                    if target_app in ['master', 'system', 'unmapped']:
+                        continue
+
+                    # Check if the target app is active.
+                    session = active_sessions.get(target_app, None)
+                    if session is not None:
+                        active_sessions_in_group.append(session)
+                        mapped_sessions.append(session)
+
+                if len(active_sessions_in_group) > 0:
+                    session_dict[idx] = SessionGroup(group_idx=idx, sessions=active_sessions_in_group)
+
+                print(f"List found: {', '.join(target)}.")
+
+        if 'unmapped' in self.target_idxs.keys():
+            unmapped_idx = self.target_idxs['unmapped']
+            unmapped_sessions = [ses for ses in active_sessions.values() if ses not in mapped_sessions]
+            if self.get_setting('system in unmapped').lower() == 'false' and system_session in unmapped_sessions:
+                unmapped_sessions.remove(system_session)
+
+            session_dict[unmapped_idx] = SessionGroup(
+                unmapped_idx,
+                sessions=unmapped_sessions
+            )
 
         self.sessions = session_dict
 

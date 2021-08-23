@@ -12,8 +12,8 @@
 # Here, number is the index
 0: master
 1: system
-2: chrome.exe
-3: spotify.exe
+2: chrome.exe, isaac-ng.exe, spotify.exe
+3: discord.exe
 4: unmapped
 
 # Find the device name when the sliders are connected to USB in Device Manager, so that when you switch USB ports,
@@ -30,3 +30,6 @@ baudrate:9600
 
 # You can use this to invert the sliders: top is low volume, bottom is high volume.
 inverted:False
+
+# Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
+system in unmapped:True
