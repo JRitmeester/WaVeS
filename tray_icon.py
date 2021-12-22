@@ -2,8 +2,12 @@ import sys
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+
+import utils
 from volume_thread import VolumeThread
 import logging
+from pycaw.pycaw import AudioUtilities
+import re
 
 logger = logging.getLogger('root')
 
@@ -21,6 +25,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         menu = QtWidgets.QMenu(parent)
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.reload)
+        showdevices = menu.addAction("Show sound devices")
+        showdevices.triggered.connect(self.show_devices)
         exit_ = menu.addAction("Exit")
         exit_.triggered.connect(self.exit)
         self.setContextMenu(menu)
@@ -60,6 +66,11 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     def exit(self):
         logger.info("Quitting application.")
         sys.exit(0)
+
+    def show_devices(self):
+        sound_devices = utils.get_devices()
+        text = "Note that these are both input and output devices!\n\n" + "\n".join(sorted(set(sound_devices)))
+        QMessageBox.information(None, "Sound devices", text)
 
     def start_app(self):
         """

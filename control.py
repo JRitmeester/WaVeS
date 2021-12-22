@@ -9,42 +9,6 @@ import webbrowser
 import re
 from pprint import pprint
 
-default_mapping_txt = """
-# Make sure this file is placed in the same directory as vc.exe. To make this startup on boot (for Windows), create a
-# shortcut and place it in the Start-up folder.
-
-# Application is either "master" for master volume, the application name "spotify.exe" (case insensitive) for Spotify
-# (for Windows, this can be found in Task Manager under the "Details" tab), "unmapped" for any and all applications
-# that are currently running, but have not been explicitly assigned a slider. "unmapped" excludes the master channel.
-# Finally, "system" allows you to control the system sound volume.
-
-# Stick to the syntax:
-#<number>:<application>
-# Here, number is the index
-0: master
-1: system
-2: chrome.exe
-3: spotify.exe
-4: unmapped
-
-# Find the device name when the sliders are connected to USB in Device Manager, so that when you switch USB ports,
-# you don't have to change the COM port.
-device name: Arduino Micro
-
-# Indicate the number of sliders you're using:
-sliders: 5
-# Port is only used if the device name can't be found automatically.
-port:COM8
-
-# Make sure this matches the baudrate on the Arduino's Serial.begin() call.
-baudrate:9600
-
-# You can use this to invert the sliders: top is low volume, bottom is high volume.
-inverted:False
-
-# Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
-system in unmapped:True
-"""
 
 class Control:
     """
@@ -53,19 +17,8 @@ class Control:
     """
 
     def __init__(self, path=None):
-        pprint([str(x) for x in AudioUtilities.GetAllDevices() if x])
+
         self.path = Path.cwd() / 'mapping.txt' if path is None else path
-
-        if not self.path.is_file():
-            self.path.parent.mkdir(exist_ok=True)
-            self.path.touch()
-            self.path.write_text(default_mapping_txt)
-            QMessageBox.information(None, "New config file created", f"A new config file was created for you in the "
-                                                                     f"same directory as the app:\n\n{str(self.path)}."
-                                                                     f"\n\nIt will now be opened for you to view the "
-                                                                     f"settings.")
-            webbrowser.open(self.path)
-
         self.sessions = None
         self.port = None
         self.baudrate = None
@@ -78,7 +31,7 @@ class Control:
         self.sliders = int(self.get_setting("sliders"))
         self.port = self.get_port()
         self.baudrate = self.get_setting("baudrate")
-        self.inverted = self.get_setting("inverted") in ["True", "true"]
+        self.inverted = self.get_setting("inverted").lower() == "true"
 
         self.get_mapping()
 

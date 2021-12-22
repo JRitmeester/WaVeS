@@ -6,7 +6,6 @@ from ctypes import POINTER, cast
 
 class MyAudioUtilities(AudioUtilities):
 
-
     @staticmethod
     def GetSpeaker(id_=None):
 

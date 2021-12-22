@@ -20,7 +20,7 @@ The [executable](https://github.com/JRitmeester/WaVeS/releases/) can be download
 ## Specifying an output device.
 To find the right name, go to Sound > Playback and find the name of the speaker you want to adjust. This does not have 
 to be your default speaker (Otherwise you can just use "master"). You can specify a small part of the string if you 
-want. The full format is: `[device name in black] ([device name in gray])`
+want. The full format is: `device: [device name in black] ([device name in gray])`
 
 Where you replace the first part `[device name in black]` with... the device name in black (like "Speakers) and the same
 for `[device name in gray]`, like "Realtek High Definition Audio". Note the need for the parentheses `()`! If there is 
@@ -35,24 +35,24 @@ An example of a config file (without comments) is:
 2: chrome.exe, isaac-ng.exe, spotify.exe
 3: discord.exe
 4: unmapped
-5: device:Luidsprekers (THX Spatial Audio)
+5: device: Speakers (Realtek High Definition Audio)
+
 sliders: 6      # Number of sliders you have
-port:COM8       # COM port used for automatic detection
+port: COM7       # COM port used for automatic detection
 device name: Arduino Micro  # Name of the device in device manager, used if COM port changes.
-baudrate:9600   # Baudrate of the microcontroller
-inverted:False  # Invert the volume
-system in unmapped:True     # Include system sounds in unmapped if it isn't explicitly assigned to anything.
+baudrate: 9600   # Baudrate of the microcontroller
+inverted: False  # Invert the volume
+system in unmapped: True     # Include system sounds in unmapped if it isn't explicitly assigned to anything.
 ```
 
 Apps can be excluded from "unmapped" by assigning specific apps to a number equal to or higher than the number of sliders you have:
 ```
-5: chrome.exe
+1000: chrome.exe
 ```
-will allow you to control all unmapped apps with "unmapped" but exclude Chrome. Why you'd want this, I'm not sure, but it's probably useful in some edge cases.
+This will allow you to control all unmapped apps with "unmapped" but exclude Chrome. Why you'd want this, I'm not sure, but it's probably useful in some edge cases.
 
 ## Usage
 Upon running the [executable](https://github.com/JRitmeester/WaVeS/releases/download/v1.0/WaVeSv1.0.exe), a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
-
 
 ## Customisation
 You are free to use the source code. The repository contains a `buid.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.

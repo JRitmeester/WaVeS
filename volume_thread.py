@@ -1,16 +1,15 @@
 import sys
-from pathlib import Path
-
+import time
 import serial
-from PyQt5.QtCore import QThread
 import logging
-
-from PyQt5.QtWidgets import QMessageBox
-
+import utils
+from pathlib import Path
 from control import Control
 
-logger = logging.getLogger('root')
+from PyQt5.QtCore import QThread
+from PyQt5.QtWidgets import QMessageBox
 
+logger = utils.get_logger()
 
 class VolumeThread(QThread):
 
@@ -18,17 +17,16 @@ class VolumeThread(QThread):
         super().__init__()
         logger.info("Creating volume thread.")
         self.running = True
-        self.control = Control(Path.cwd() / 'mapping.txt')
+        self.control = Control(utils.get_appdata_path() / 'mapping.txt')
         logger.info("Setting up serial communication.")
         try:
             self.arduino = serial.Serial(self.control.port, self.control.baudrate, timeout=.1)
-        except serial.SerialException as e:
-            msg = QMessageBox.critical(None, "Application already running",
-                                       "The application crashed because the serial "
-                                       "connection is busy. This may mean that another "
-                                       "instance is already running. Please check the "
-                                       "system tray or the task manager.")
-
+            logger.info(self.arduino)
+        except serial.SerialException:
+            QMessageBox.critical(None, "Application already running",
+                                       "The application crashed because the serial connection is busy. This may mean "
+                                       "that another instance is already running. Please check the system tray or the "
+                                       "task manager.")
             raise
 
     def run(self):

@@ -3,7 +3,11 @@ from typing import List
 
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
+
+import utils
 from MyAudioUtilities import MyAudioUtilities
+
+logger = utils.get_logger()
 
 class Session:
     """
@@ -113,12 +117,12 @@ class Device(Session):
             if device_name.lower() in str(device).lower():
                 self.selected_device = device
         if self.selected_device is None:
-            return
+            raise RuntimeError(f"Sound device {device_name} could not be found. Please correct the name or remove it.")
 
         speaker = MyAudioUtilities.GetSpeaker(self.selected_device.id)
         interface = speaker.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
-        print(f"Selected \"{self}\" for \"{device_name}\"")
+        logger.info(f"Selected \"{self}\" for \"{device_name.strip()}\"")
 
     def __repr__(self):
         return str(self.selected_device)

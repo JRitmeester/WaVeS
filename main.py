@@ -9,7 +9,45 @@ from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
+import utils
 from tray_icon import SystemTrayIcon
+
+default_mapping_txt = """
+# Make sure this file is placed in the same directory as vc.exe. To make this startup on boot (for Windows), create a
+# shortcut and place it in the Start-up folder.
+
+# Application is either "master" for master volume, the application name "spotify.exe" (case insensitive) for Spotify
+# (for Windows, this can be found in Task Manager under the "Details" tab), "unmapped" for any and all applications
+# that are currently running, but have not been explicitly assigned a slider. "unmapped" excludes the master channel.
+# Finally, "system" allows you to control the system sound volume.
+
+# Stick to the syntax:
+#<number>:<application>
+# Here, number is the index
+0: master
+1: system
+2: chrome.exe
+3: spotify.exe
+4: unmapped
+
+# Find the device name when the sliders are connected to USB in Device Manager, so that when you switch USB ports,
+# you don't have to change the COM port.
+device name: Arduino Micro
+
+# Indicate the number of sliders you're using:
+sliders: 5
+# Port is only used if the device name can't be found automatically.
+port:COM7
+
+# Make sure this matches the baudrate on the Arduino's Serial.begin() call.
+baudrate:9600
+
+# You can use this to invert the sliders: top is low volume, bottom is high volume.
+inverted:False
+
+# Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
+system in unmapped:True
+"""
 
 
 class StdErrHandler(QObject):
@@ -35,11 +73,25 @@ def except_hook(cls, exception, traceback):
     sys.excepthook(cls, exception, traceback)
 
 
+def initialise(path):
+    path.mkdir()
+    mapping_file = path / 'mapping.txt'
+    mapping_file.touch()
+    mapping_file.write_text(default_mapping_txt)
+    QMessageBox.information(None, "New config file created",
+                            f"A new config file was created for you in the same directory as the app:\n\n{str(path)}."
+                            f"\n\nIt will now be opened for you to view the settings.\n\nUse the system tray icon > "
+                            f"\"Show sound devices\" to see the sound device names if needed.")
+    webbrowser.open(path)
+
 if __name__ == "__main__":
+    appdata_path = utils.get_appdata_path()
+    if not appdata_path.exists():
+        initialise(appdata_path)
 
     ## LOGGER STUFF
     # Create the logs directory if it doesn't exist yet.
-    log_path = Path(os.getenv("APPDATA")) / 'WVSM' / 'logs'
+    log_path = Path(os.getenv("APPDATA")) / 'WaVeS' / 'logs'
     if not log_path.is_dir():
         log_path.mkdir(parents=True)
 
@@ -51,7 +103,7 @@ if __name__ == "__main__":
         log.unlink()
 
     # Setup the logger
-    logger = logging.getLogger('root')
+    logger = utils.get_logger()
     logger.setLevel(logging.DEBUG)
 
     # Create the logger file handler to write the logs to file.
@@ -60,7 +112,7 @@ if __name__ == "__main__":
     logger.addHandler(handler)
 
     logger.info("="*50)
-    logger.info("Running PyWinVol...")
+    logger.info("Running WaVeS...")
 
     ## ERROR STUFF
     old_excepthook = sys.excepthook
@@ -68,6 +120,7 @@ if __name__ == "__main__":
 
     ## APP STUFF
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     w = QtWidgets.QWidget()
 
     icon_dir = Path.cwd() / 'WaVeS/spec/icon.ico'  # For testing the compiled version in the dist folder
@@ -98,5 +151,3 @@ if __name__ == "__main__":
         logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
     app.exec()
-    print("This should not be printed.")
-
