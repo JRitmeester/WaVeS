@@ -14,7 +14,7 @@
 1: system
 2: chrome.exe, isaac-ng.exe, spotify.exe
 3: discord.exe
-4: unmapped
+4: device: Luidsprekers (THX Spatial Audio)
 
 # Find the device name when the sliders are connected to USB in Device Manager, so that when you switch USB ports,
 # you don't have to change the COM port.
@@ -23,7 +23,7 @@ device name: Arduino Micro
 # Indicate the number of sliders you're using:
 sliders: 5
 # Port is only used if the device name can't be found automatically.
-port:COM8
+port:COM7
 
 # Make sure this matches the baudrate on the Arduino's Serial.begin() call.
 baudrate:9600

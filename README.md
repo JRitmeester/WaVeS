@@ -10,12 +10,24 @@ The Arduino code can be found [here](https://github.com/omriharel/deej/blob/mast
 
 ## Installation
 
-The [executable](https://github.com/JRitmeester/WaVeS/releases/download/v1.0/WaVeSv1.0.exe) can be downloaded as-is. It will create a `mappings.txt` file in the same directory as where the executable was run. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
+The [executable](https://github.com/JRitmeester/WaVeS/releases/) can be downloaded as-is. It will create a `mappings.txt` file in the same directory as where the executable was run. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
 * A specific application (`chrome.exe`, `spotify.exe`, games, etc.)
 * System volume
 * Unmapped (everything that does not have its own slider)
 * Master volume
+* A specific output device. 
+  
+## Specifying an output device.
+To find the right name, go to Sound > Playback and find the name of the speaker you want to adjust. This does not have 
+to be your default speaker (Otherwise you can just use "master"). You can specify a small part of the string if you 
+want. The full format is: `[device name in black] ([device name in gray])`
 
+Where you replace the first part `[device name in black]` with... the device name in black (like "Speakers) and the same
+for `[device name in gray]`, like "Realtek High Definition Audio". Note the need for the parentheses `()`! If there is 
+only one device with the name "Speakers" in either one, you can just use that.
+
+
+## Example config file
 An example of a config file (without comments) is:
 ```
 0: master
@@ -23,7 +35,8 @@ An example of a config file (without comments) is:
 2: chrome.exe, isaac-ng.exe, spotify.exe
 3: discord.exe
 4: unmapped
-sliders: 5      # Number of sliders you have
+5: device:Luidsprekers (THX Spatial Audio)
+sliders: 6      # Number of sliders you have
 port:COM8       # COM port used for automatic detection
 device name: Arduino Micro  # Name of the device in device manager, used if COM port changes.
 baudrate:9600   # Baudrate of the microcontroller

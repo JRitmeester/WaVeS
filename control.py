@@ -4,8 +4,10 @@ from typing import Union
 from PyQt5.QtWidgets import QMessageBox
 from pycaw.pycaw import AudioUtilities
 from serial.tools import list_ports
-from sessions import SessionGroup, Master, Session, System
+from sessions import SessionGroup, Master, Session, System, Device
 import webbrowser
+import re
+from pprint import pprint
 
 default_mapping_txt = """
 # Make sure this file is placed in the same directory as vc.exe. To make this startup on boot (for Windows), create a
@@ -51,6 +53,7 @@ class Control:
     """
 
     def __init__(self, path=None):
+        pprint([str(x) for x in AudioUtilities.GetAllDevices() if x])
         self.path = Path.cwd() / 'mapping.txt' if path is None else path
 
         if not self.path.is_file():
@@ -91,7 +94,7 @@ class Control:
         :return: The first element in the config file that contains "text", if any.
         """
         setting = list(filter(lambda x: text + ":" in x, self.lines))[0]
-        return setting.split(":")[1].strip()
+        return re.sub(r"^[a-zA-Z0-9]*: *", "", setting)
 
     def get_mapping(self):
         self.load_config()
@@ -123,6 +126,9 @@ class Control:
                     session_dict[idx] = System(idx=idx, session=system_session)
                     mapped_sessions.append(system_session)
 
+                elif "device:" in target:
+                    session_dict[idx] = Device(target[7:])
+
                 elif target != 'unmapped':  # Can be any application
                     if target in active_sessions:
                         session = active_sessions.get(target, None)
@@ -137,7 +143,7 @@ class Control:
                     target_app = target_app.lower()
 
                     # Exclude the other categories. Might change in the future.
-                    if target_app in ['master', 'system', 'unmapped']:
+                    if target_app in ['master', 'system', 'unmapped'] or 'device:' in target_app:
                         continue
 
                     # Check if the target app is active.

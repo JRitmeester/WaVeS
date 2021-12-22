@@ -3,7 +3,7 @@ from typing import List
 
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
-
+from MyAudioUtilities import MyAudioUtilities
 
 class Session:
     """
@@ -100,3 +100,31 @@ class System(Session):
 
     def __repr__(self):
         return self.name
+
+
+class Device(Session):
+
+    def __init__(self, device_name: str):
+        super().__init__(-1)
+        self.selected_device = None
+
+        devicelist = AudioUtilities.GetAllDevices()
+        for device in devicelist:
+            if device_name.lower() in str(device).lower():
+                self.selected_device = device
+        if self.selected_device is None:
+            return
+
+        speaker = MyAudioUtilities.GetSpeaker(self.selected_device.id)
+        interface = speaker.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
+        print(f"Selected \"{self}\" for \"{device_name}\"")
+
+    def __repr__(self):
+        return str(self.selected_device)
+
+    def set_volume(self, value):
+        self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
+
+    def get_volume(self):
+        return self.volume.GetMasterVolumeLevelScalar()
