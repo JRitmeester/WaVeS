@@ -8,6 +8,7 @@ from volume_thread import VolumeThread
 import logging
 from pycaw.pycaw import AudioUtilities
 import re
+import webbrowser
 
 logger = logging.getLogger('root')
 
@@ -27,6 +28,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         reload_.triggered.connect(self.reload)
         showdevices = menu.addAction("Show sound devices")
         showdevices.triggered.connect(self.show_devices)
+        open_config = menu.addAction("Open configuration file")
+        open_config.triggered.connect(self.open_config_file)
         exit_ = menu.addAction("Exit")
         exit_.triggered.connect(self.exit)
         self.setContextMenu(menu)
@@ -71,6 +74,10 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         sound_devices = utils.get_devices()
         text = "Note that these are both input and output devices!\n\n" + "\n".join(sorted(set(sound_devices)))
         QMessageBox.information(None, "Sound devices", text)
+
+    @staticmethod
+    def open_config_file(self):
+        webbrowser.open(utils.get_appdata_path() / 'mapping.txt')
 
     def start_app(self):
         """
