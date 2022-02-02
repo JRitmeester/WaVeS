@@ -9,6 +9,7 @@ from MyAudioUtilities import MyAudioUtilities
 
 logger = utils.get_logger()
 
+
 class Session:
     """
     Contains the pycaw Session, the mapping index, the session name and the SimpleAudioVolume to get/set the volume.
@@ -47,8 +48,7 @@ class SessionGroup:
         self.sessions = [Session(group_idx, session) for session in sessions]
 
     def __repr__(self):
-        return f"SessionGroup(index={self.group_idx}, " \
-               f"sessions={[session.name for session in self.sessions]})"
+        return f"SessionGroup(index={self.group_idx}, " f"sessions={[session.name for session in self.sessions]})"
 
     def __contains__(self, item: AudioSession):
         if type(item) == AudioSession:
@@ -76,7 +76,6 @@ class SessionGroup:
 
 
 class Master(Session):
-
     def __init__(self, idx: int):
         super().__init__(idx=idx)
 
@@ -85,7 +84,7 @@ class Master(Session):
         interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
 
-        self.name = 'Master'
+        self.name = "Master"
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
@@ -95,10 +94,9 @@ class Master(Session):
 
 
 class System(Session):
-
     def __init__(self, idx: int, session):
         super().__init__(idx=idx, session=session)
-        self.name = 'System Sounds'
+        self.name = "System Sounds"
         self.session = session
         self.volume = session.SimpleAudioVolume
 
@@ -107,7 +105,6 @@ class System(Session):
 
 
 class Device(Session):
-
     def __init__(self, device_name: str):
         super().__init__(-1)
         self.selected_device = None
@@ -122,7 +119,7 @@ class Device(Session):
         speaker = MyAudioUtilities.GetSpeaker(self.selected_device.id)
         interface = speaker.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
-        logger.info(f"Selected \"{self}\" for \"{device_name.strip()}\"")
+        logger.info(f'Selected "{self}" for "{device_name.strip()}"')
 
     def __repr__(self):
         return str(self.selected_device)

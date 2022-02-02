@@ -10,10 +10,10 @@ from pycaw.pycaw import AudioUtilities
 import re
 import webbrowser
 
-logger = logging.getLogger('root')
+logger = logging.getLogger("root")
+
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
-
     def __init__(self, icon, parent=None):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
         self.icon = icon
@@ -77,7 +77,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
     @staticmethod
     def open_config_file(self):
-        webbrowser.open(utils.get_appdata_path() / 'mapping.txt')
+        webbrowser.open(utils.get_appdata_path() / "mapping.txt")
 
     def start_app(self):
         """

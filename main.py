@@ -55,6 +55,7 @@ class StdErrHandler(QObject):
     This class provides an alternate write() method for stderr messages.
     Messages are sent by pyqtSignal to the pyqtSlot in the main window.
     """
+
     err_msg = pyqtSignal(str)
 
     def __init__(self, parent=None):
@@ -75,14 +76,18 @@ def except_hook(cls, exception, traceback):
 
 def initialise(path):
     path.mkdir()
-    mapping_file = path / 'mapping.txt'
+    mapping_file = path / "mapping.txt"
     mapping_file.touch()
     mapping_file.write_text(default_mapping_txt)
-    QMessageBox.information(None, "New config file created",
-                            f"A new config file was created for you in the same directory as the app:\n\n{str(path)}."
-                            f"\n\nIt will now be opened for you to view the settings.\n\nUse the system tray icon > "
-                            f"\"Show sound devices\" to see the sound device names if needed.")
+    QMessageBox.information(
+        None,
+        "New config file created",
+        f"A new config file was created for you in the same directory as the app:\n\n{str(path)}."
+        f"\n\nIt will now be opened for you to view the settings.\n\nUse the system tray icon > "
+        f'"Show sound devices" to see the sound device names if needed.',
+    )
     webbrowser.open(path)
+
 
 if __name__ == "__main__":
     appdata_path = utils.get_appdata_path()
@@ -91,12 +96,12 @@ if __name__ == "__main__":
 
     ## LOGGER STUFF
     # Create the logs directory if it doesn't exist yet.
-    log_path = Path(os.getenv("APPDATA")) / 'WaVeS' / 'logs'
+    log_path = Path(os.getenv("APPDATA")) / "WaVeS" / "logs"
     if not log_path.is_dir():
         log_path.mkdir(parents=True)
 
     # Delete all the logs except for the 5 most recent ones.
-    all_logs = list(filter(Path.is_file, log_path.glob('**/*')))
+    all_logs = list(filter(Path.is_file, log_path.glob("**/*")))
     most_recent_logs = sorted(all_logs, key=lambda x: x.stat().st_ctime, reverse=True)[:5]
     logs_to_delete = [log for log in all_logs if log not in most_recent_logs]
     for log in logs_to_delete:
@@ -108,10 +113,10 @@ if __name__ == "__main__":
 
     # Create the logger file handler to write the logs to file.
     handler = logging.FileHandler(log_path / f'WVSM-{datetime.datetime.now().strftime("%d%m%y-%H%M%S")}.log')
-    handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
+    handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
     logger.addHandler(handler)
 
-    logger.info("="*50)
+    logger.info("=" * 50)
     logger.info("Running WaVeS...")
 
     ## ERROR STUFF
@@ -123,13 +128,17 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     w = QtWidgets.QWidget()
 
-    icon_dir = Path.cwd() / 'WaVeS/spec/icon.ico'  # For testing the compiled version in the dist folder
+    icon_dir = Path.cwd() / "WaVeS/spec/icon.ico"  # For testing the compiled version in the dist folder
     if not icon_dir.is_file():
-        icon_dir = Path.cwd() / 'icon.ico'
+        icon_dir = Path.cwd() / "icon.ico"
     if not icon_dir.is_file():
-        QMessageBox.critical(None, "Icon not found", "Could not find the icon for the system tray. Please make sure "
-                                                     "there is a file \"icon.ico\" in the same directory as the "
-                                                     "executable.")
+        QMessageBox.critical(
+            None,
+            "Icon not found",
+            "Could not find the icon for the system tray. Please make sure "
+            'there is a file "icon.ico" in the same directory as the '
+            "executable.",
+        )
         sys.exit(0)
 
     icon = QtGui.QIcon(str(icon_dir))
@@ -147,7 +156,11 @@ if __name__ == "__main__":
         tray_icon.show()
         tray_icon.start_app()
     except Exception as e:
-        QMessageBox.critical(None, "Error during start-up", f"An error occurred during start-up:\n\n{traceback.format_exc()}")
+        QMessageBox.critical(
+            None,
+            "Error during start-up",
+            f"An error occurred during start-up:\n\n{traceback.format_exc()}",
+        )
         logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
     app.exec()

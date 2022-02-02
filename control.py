@@ -18,7 +18,8 @@ class Control:
 
     def __init__(self, path=None):
 
-        self.path = Path.cwd() / 'mapping.txt' if path is None else path
+        # If no path is given, look at the WaVeS folder in %appdata%.
+        self.path = self.get_appdata() / "WaVeS/mapping.txt" if path is None else path
         self.sessions = None
         self.port = None
         self.baudrate = None
@@ -36,7 +37,10 @@ class Control:
         self.get_mapping()
 
     def load_config(self):
-        self.lines = self.path.read_text().split('\n')
+        """
+        Read the mapping text file and split the lines.
+        """
+        self.lines = self.path.read_text().split("\n")
 
     def get_setting(self, text):
         """
@@ -55,48 +59,70 @@ class Control:
 
         # For each of the sliders, get the mapping from config.txt, if it exists, and create the mapping.
         for idx in range(self.sliders):
-            application_str = self.get_setting(str(idx))    # Get the settings from the config for each index.
-            if ',' in application_str:
-                application_str = tuple(app.strip() for app in application_str.split(','))
-            self.target_idxs[application_str] = int(idx)    # Store the settings in a dictionary.
+            application_str = self.get_setting(str(idx))  # Get the settings from the config for each index.
+            if "," in application_str:
+                application_str = tuple(app.strip() for app in application_str.split(","))
+            self.target_idxs[application_str] = int(idx)  # Store the settings in a dictionary.
 
-        session_dict = {}  # Look up table for the incoming Arduino data, mapping an index to a Session object.
+        session_dict = {}
+
+        # Look up table for the incoming Arduino data, mapping an index to a Session object.
         self.found_pycaw_sessions = AudioUtilities.GetAllSessions()
 
-        active_sessions = {session.Process.name().lower(): session
-                           for session in self.found_pycaw_sessions
-                           if session.Process is not None}
-        mapped_sessions = []
-        system_session = [session for session in self.found_pycaw_sessions if 'SystemRoot' in session.DisplayName][0]
+        active_sessions = {
+            session.Process.name().lower(): session
+            for session in self.found_pycaw_sessions
+            if session.Process is not None
+        }
 
+        mapped_sessions = []
+        system_session = [session for session in self.found_pycaw_sessions if "SystemRoot" in session.DisplayName][0]
+
+        # Loop through all the targets and the slider indices they are suppposed to map to.
+        # A target is the second part of the mapping string, after the first colon (:).
         for target, idx in self.target_idxs.items():
+
+            # If the target is a string, it is a single target.
             if type(target) == str:
                 target = target.lower()
-                if target == 'master':
+
+                # If indicated with "master", create a Master volume session.
+                if target == "master":
                     session_dict[idx] = Master(idx=idx)
 
-                elif target == 'system':
+                # If indicated with "system", create a System volume session.
+                elif target == "system":
                     session_dict[idx] = System(idx=idx, session=system_session)
+
+                    # System sounds are considered a Session by Pycaw, so add it so that it is not picked up
+                    # at the end by an eventual "unmapped" category.
                     mapped_sessions.append(system_session)
 
+                # If indicated by "device:", try to make a Device session, controlling an audio output device.
                 elif "device:" in target:
                     session_dict[idx] = Device(target[7:])
 
-                elif target != 'unmapped':  # Can be any application
+                # If not indicated by "master", "system", "system", or "device:", then consider it an application name,
+                # and map only that application to the slider.
+                elif target != "unmapped":  # Can be any application
+
+                    # Check if the application name is found in the current active sessions.
                     if target in active_sessions:
                         session = active_sessions.get(target, None)
-                        if session is not None:
+                        if session is not None:  # If there is a session that matches, create a custom Session for it.
                             session_dict[idx] = Session(idx, session)
                         mapped_sessions.append(session)
 
+            # If the target is a tuple, it is a group.
             elif type(target) == tuple:
-                active_sessions_in_group = []  # Track the sessions that are actually running and are mapped.
+                active_sessions_in_group = []  # fmt: skip
 
+                # Check for each application that is part of the group, if it's "master", "system" or "unmapped"
                 for target_app in target:
                     target_app = target_app.lower()
 
                     # Exclude the other categories. Might change in the future.
-                    if target_app in ['master', 'system', 'unmapped'] or 'device:' in target_app:
+                    if target_app in ["master", "system", "unmapped"] or "device:" in target_app:
                         continue
 
                     # Check if the target app is active.
@@ -105,19 +131,19 @@ class Control:
                         active_sessions_in_group.append(session)
                         mapped_sessions.append(session)
 
+                # If one or more of the targeted applications are active, add a SessionGroup with them.
                 if len(active_sessions_in_group) > 0:
                     session_dict[idx] = SessionGroup(group_idx=idx, sessions=active_sessions_in_group)
 
-        if 'unmapped' in self.target_idxs.keys():
-            unmapped_idx = self.target_idxs['unmapped']
+        # Finally, if indicated with "unmapped", create a SessionGroup for all active audio session that haven't
+        # been mapped before.
+        if "unmapped" in self.target_idxs.keys():
+            unmapped_idx = self.target_idxs["unmapped"]
             unmapped_sessions = [ses for ses in active_sessions.values() if ses not in mapped_sessions]
-            if self.get_setting('system in unmapped').lower() == 'false' and system_session in unmapped_sessions:
+            if self.get_setting("system in unmapped").lower() == "false" and system_session in unmapped_sessions:
                 unmapped_sessions.remove(system_session)
 
-            session_dict[unmapped_idx] = SessionGroup(
-                unmapped_idx,
-                sessions=unmapped_sessions
-            )
+            session_dict[unmapped_idx] = SessionGroup(unmapped_idx, sessions=unmapped_sessions)
 
         self.sessions = session_dict
 
@@ -164,3 +190,7 @@ class Control:
                 return self.get_setting("port")
             except:
                 raise ValueError("The config file does not contain the right device name or an appropriate port.")
+
+    @staticmethod
+    def get_appdata():
+        return Path.home() / "AppData / Roaming"
