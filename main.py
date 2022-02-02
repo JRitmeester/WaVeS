@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 
 import utils
 from tray_icon import SystemTrayIcon
-
+import sys
 default_mapping_txt = """
 # Make sure this file is placed in the same directory as vc.exe. To make this startup on boot (for Windows), create a
 # shortcut and place it in the Start-up folder.
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     ## LOGGER STUFF
     # Create the logs directory if it doesn't exist yet.
-    log_path = Path(os.getenv("APPDATA")) / "WaVeS" / "logs"
+    log_path = appdata_path / "logs"
     if not log_path.is_dir():
         log_path.mkdir(parents=True)
 

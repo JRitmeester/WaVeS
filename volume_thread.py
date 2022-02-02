@@ -13,11 +13,14 @@ logger = utils.get_logger()
 
 
 class VolumeThread(QThread):
-    def __init__(self):
+    def __init__(self, mapping_dir=None):
         super().__init__()
         logger.info("Creating volume thread.")
         self.running = True
-        self.control = Control(utils.get_appdata_path() / "mapping.txt")
+
+
+        self.control = Control()
+
         logger.info("Setting up serial communication.")
         try:
             self.arduino = serial.Serial(self.control.port, self.control.baudrate, timeout=0.1)

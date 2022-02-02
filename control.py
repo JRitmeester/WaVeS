@@ -4,6 +4,8 @@ from typing import Union
 from PyQt5.QtWidgets import QMessageBox
 from pycaw.pycaw import AudioUtilities
 from serial.tools import list_ports
+
+import utils
 from sessions import SessionGroup, Master, Session, System, Device
 import webbrowser
 import re
@@ -16,10 +18,17 @@ class Control:
     and harbours the sessions so that they can be accessed as needed.
     """
 
-    def __init__(self, path=None):
+    def __init__(self):
 
-        # If no path is given, look at the WaVeS folder in %appdata%.
-        self.path = self.get_appdata() / "WaVeS/mapping.txt" if path is None else path
+        # Check if there is a custom mapping directory specified in config.yaml. If not, use %appdata%.
+        mapping_dir = utils.get_mapping_dir()
+        if mapping_dir is None or mapping_dir == "":
+            self.mapping_dir = utils.get_appdata_path() / "mapping.txt"
+            utils.save_mapping_dir(self.mapping_dir.as_posix())
+        else:
+            self.mapping_dir = Path(mapping_dir)
+
+        print(self.mapping_dir)
         self.sessions = None
         self.port = None
         self.baudrate = None
@@ -40,7 +49,7 @@ class Control:
         """
         Read the mapping text file and split the lines.
         """
-        self.lines = self.path.read_text().split("\n")
+        self.lines = self.mapping_dir.read_text().split("\n")
 
     def get_setting(self, text):
         """
