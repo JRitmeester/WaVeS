@@ -163,4 +163,4 @@ if __name__ == "__main__":
         )
         logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
-    app.exec()
+    sys.exit(app.exec())

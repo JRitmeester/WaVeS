@@ -4,3 +4,5 @@
 /.idea/
 /WaVeS/
 /main.exe
+*.pyc
+*.spec

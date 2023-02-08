@@ -18,7 +18,8 @@ class Control:
     and harbours the sessions so that they can be accessed as needed.
     """
 
-    def __init__(self):
+    def __init__(self, path=None):
+        self.path = (self.get_config_file_path() / 'WaVeS' / 'mapping.txt') if path is None else path
 
         # Check if there is a custom mapping directory specified in config.yaml. If not, use %appdata%.
         mapping_dir = utils.get_mapping_dir()
@@ -201,5 +202,11 @@ class Control:
                 raise ValueError("The config file does not contain the right device name or an appropriate port.")
 
     @staticmethod
-    def get_appdata():
-        return Path.home() / "AppData / Roaming"
+    def get_config_file_path():
+        """
+        Returns a parent directory path where persistent application data can be stored.
+        https://stackoverflow.com/questions/19078969/python-getting-appdata-folder-in-a-cross-platform-way
+        """
+
+        return Path.home() / "AppData/Roaming"
+
