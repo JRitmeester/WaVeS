@@ -1,3 +1,18 @@
+"""
+WaVeS (Windows Volume Slider) - A PyQt5-based application for controlling Windows audio volumes using Arduino sliders.
+
+This module serves as the main entry point for the WaVeS application. It initializes the system tray interface,
+sets up logging, and handles application configuration. The application allows users to control various audio 
+channels (master, system, and individual applications) using physical Arduino-based sliders.
+
+Key Features:
+- System tray integration for easy access
+- Configurable audio channel mapping
+- Arduino-based volume control integration
+- Logging system for debugging
+- Error handling and reporting
+"""
+
 import datetime
 import logging
 import os
@@ -52,8 +67,13 @@ system in unmapped:True
 
 class StdErrHandler(QObject):
     """
-    This class provides an alternate write() method for stderr messages.
-    Messages are sent by pyqtSignal to the pyqtSlot in the main window.
+    Custom stderr handler that redirects error messages to the GUI.
+    
+    This class intercepts standard error messages and emits them as Qt signals,
+    allowing them to be displayed in the application's GUI interface.
+    
+    Attributes:
+        err_msg (pyqtSignal): Signal emitted when an error message is received
     """
 
     err_msg = pyqtSignal(str)
@@ -70,11 +90,28 @@ class StdErrHandler(QObject):
 
 
 def except_hook(cls, exception, traceback):
+    """
+    Global exception handler that logs uncaught exceptions.
+    
+    Args:
+        cls: Exception class
+        exception: Exception instance
+        traceback: Traceback object
+    """
     logger.critical("Uncaught exception", exc_info=(cls, exception, traceback))
     sys.excepthook(cls, exception, traceback)
 
 
 def initialise(path):
+    """
+    Initialize the application configuration directory and create default mapping file.
+    
+    Args:
+        path (Path): Path where configuration files should be created
+        
+    Creates the configuration directory and a default mapping.txt file with
+    example configurations for audio channel mapping.
+    """
     path.mkdir()
     mapping_file = path / "mapping.txt"
     mapping_file.touch()

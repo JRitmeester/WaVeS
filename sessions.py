@@ -12,7 +12,13 @@ logger = utils.get_logger()
 
 class Session:
     """
-    Contains the pycaw Session, the mapping index, the session name and the SimpleAudioVolume to get/set the volume.
+    Base class for managing individual audio sessions.
+    
+    Attributes:
+        idx (int): Index for mapping to physical slider
+        session (AudioSession): pycaw audio session object
+        name (str): Process name of the audio session
+        volume (SimpleAudioVolume): Volume control interface
     """
 
     def __init__(self, idx: int, session: AudioSession = None):
@@ -40,7 +46,14 @@ class Session:
 
 class SessionGroup:
     """
-    Contains the pycaw Session, the mapping index, the session name and the SimpleAudioVolume to get/set the volume.
+    Groups multiple audio sessions for collective volume control.
+    
+    Useful for controlling volume of multiple instances of the same application
+    or related audio sessions together.
+    
+    Attributes:
+        group_idx (int): Index for mapping to physical slider
+        sessions (List[Session]): List of audio sessions in this group
     """
 
     def __init__(self, group_idx: int, sessions: List[AudioSession]):
@@ -76,6 +89,12 @@ class SessionGroup:
 
 
 class Master(Session):
+    """
+    Controls the system master volume.
+    
+    Provides interface to control the overall system volume level
+    using the Windows audio endpoint volume interface.
+    """
     def __init__(self, idx: int):
         super().__init__(idx=idx)
 
@@ -94,6 +113,12 @@ class Master(Session):
 
 
 class System(Session):
+    """
+    Controls system sound effects volume.
+    
+    Manages volume for Windows system sounds like notifications,
+    alerts, and other system audio events.
+    """
     def __init__(self, idx: int, session):
         super().__init__(idx=idx, session=session)
         self.name = "System Sounds"
@@ -105,6 +130,15 @@ class System(Session):
 
 
 class Device(Session):
+    """
+    Controls specific audio output devices.
+    
+    Allows direct control of individual audio devices like speakers,
+    headphones, or other audio outputs.
+    
+    Attributes:
+        selected_device: The specific audio device being controlled
+    """
     def __init__(self, device_name: str):
         super().__init__(-1)
         self.selected_device = None

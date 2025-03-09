@@ -1,3 +1,14 @@
+"""
+Control module for WaVeS application.
+
+This module handles the core functionality of the Windows Volume Slider application,
+managing audio sessions, device communication, and volume control mapping.
+
+The module provides a Control class that serves as the main interface between
+the Arduino hardware and Windows audio system, handling configuration parsing
+and volume control operations.
+"""
+
 from pathlib import Path
 from typing import Union
 
@@ -14,11 +25,32 @@ from pprint import pprint
 
 class Control:
     """
-    Contains all the fields necessary to control the audio sessions. It is responsible for parsing the config file,
-    and harbours the sessions so that they can be accessed as needed.
+    Main controller class for audio session management and hardware integration.
+    
+    This class handles all audio session control operations, including:
+    - Configuration file parsing and management
+    - Audio session discovery and mapping
+    - Communication with Arduino hardware
+    - Volume control operations
+    
+    Attributes:
+        path (Path): Path to the configuration file
+        mapping_dir (Path): Directory containing mapping configurations
+        sessions (list): List of active audio sessions
+        port (str): Serial port for Arduino communication
+        baudrate (int): Serial communication baudrate
+        inverted (bool): Whether slider values should be inverted
+        sliders (int): Number of physical sliders connected
     """
 
     def __init__(self, path=None):
+        """
+        Initialize the Control instance.
+        
+        Args:
+            path (Path, optional): Custom path to configuration file.
+                                 If None, uses default location.
+        """
         self.path = (self.get_config_file_path() / 'WaVeS' / 'mapping.txt') if path is None else path
 
         # Check if there is a custom mapping directory specified in config.yaml. If not, use %appdata%.
@@ -48,17 +80,30 @@ class Control:
 
     def load_config(self):
         """
-        Read the mapping text file and split the lines.
+        Load and parse the configuration file.
+        
+        Reads the mapping.txt file and extracts settings for:
+        - Audio channel mappings
+        - Device configuration
+        - Slider settings
+        
+        Raises:
+            FileNotFoundError: If mapping.txt cannot be found
         """
         self.lines = self.mapping_dir.read_text().split("\n")
 
-    def get_setting(self, text):
+    def get_setting(self, text: str) -> str:
         """
-        Finds a line from the config file that contains "text".
-        E.g. get_setting("0") will get the application that is set to the first slider, and get_setting("port")
-        will get the port value from the config.
-        :param text: Text that is to be found, like "port" or "baudrate"
-        :return: The first element in the config file that contains "text", if any.
+        Extract a specific setting from the configuration file.
+        
+        Args:
+            text (str): The setting name to search for
+            
+        Returns:
+            str: The value of the requested setting
+            
+        Raises:
+            ValueError: If the setting is not found
         """
         setting = list(filter(lambda x: text + ":" in x, self.lines))[0]
         return re.sub(r"^[a-zA-Z0-9]*: *", "", setting)

@@ -1,3 +1,21 @@
+"""
+Utility functions for WaVeS application.
+
+Provides helper functions for configuration management, file operations,
+and audio device discovery. Handles YAML configuration files and application
+paths.
+
+Functions:
+    get_yaml_dir: Get path to YAML configuration file
+    get_mapping_dir: Get directory containing mapping configuration
+    create_config: Create default configuration file
+    get_config: Load configuration from YAML
+    save_mapping_dir: Save mapping directory to configuration
+    get_devices: List all available audio devices
+    get_appdata_path: Get application data directory
+    get_logger: Get application logger instance
+"""
+
 import yaml
 from pycaw.pycaw import AudioUtilities
 from pathlib import Path
@@ -7,9 +25,16 @@ import utils
 
 
 def get_yaml_dir():
+    """Get path to the YAML configuration file."""
     return get_appdata_path() / 'config.yaml'
 
 def get_mapping_dir():
+    """
+    Get the directory containing mapping configurations.
+    
+    Returns:
+        str: Path to mapping directory or None if not configured
+    """
     config = get_config()
     if config is not None:
         return config['mapping_dir']
