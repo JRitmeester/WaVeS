@@ -56,7 +56,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         self.activated.connect(self.onClick)
 
-        self.thread = VolumeThread()
+        self.thread: VolumeThread = VolumeThread()
 
     def std_err_post(self, msg):
         """

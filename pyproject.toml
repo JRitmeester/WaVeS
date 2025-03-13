@@ -1,2 +1,20 @@
-[tool.black]
-line-length = 120
+[tool.poetry]
+name = "waves"
+version = "0.1.0"
+description = ""
+authors = ["Jeroen Ritmeester <jeroen.c.ritmeester@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pycaw = "^20240210"
+comtypes = "^1.4.10"
+pyqt5-sip = "^12.17.0"
+pyyaml = "^6.0.2"
+pyserial = "^3.5"
+watchdog = "^6.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
