@@ -25,6 +25,7 @@ import re
 
 def get_yaml_dir():
     """Get path to the YAML configuration file."""
+    # TODO: Why did I know what YAML was but decided the main config should be plain text?
     return get_appdata_path() / 'config.yaml'
 
 def get_mapping_dir():
@@ -41,6 +42,7 @@ def get_mapping_dir():
         create_config()
 
 def create_config():
+    # TODO: Un-make this function.
     yaml_dir = get_yaml_dir()
     yaml_dir.touch()
     yaml_dir.write_text("mapping_dir: \"\"")
