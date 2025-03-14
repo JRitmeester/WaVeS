@@ -6,18 +6,16 @@ for accessing specific audio devices by ID. This module is particularly
 useful for controlling individual audio endpoints in Windows.
 """
 
-from pycaw.pycaw import AudioUtilities
 import comtypes
-from comtypes import CLSCTX_ALL
 from pycaw.pycaw import (
     AudioUtilities,
-    IAudioEndpointVolume,
-    CLSID_MMDeviceEnumerator,
     IMMDeviceEnumerator,
     EDataFlow,
     ERole,
 )
-from ctypes import POINTER, cast
+from pycaw.api.mmdeviceapi import IMMDeviceEnumerator
+from pycaw.constants import CLSID_MMDeviceEnumerator
+
 
 
 class MyAudioUtilities(AudioUtilities):
