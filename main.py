@@ -15,10 +15,10 @@ Key Features:
 
 import datetime
 import logging
-import os
 import sys
 import traceback
 from pathlib import Path
+import webbrowser
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QObject
