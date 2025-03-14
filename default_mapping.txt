@@ -1,0 +1,34 @@
+# Make sure this file is placed in the same directory as vc.exe. To make this startup on boot (for Windows), create a
+# shortcut and place it in the Start-up folder.
+
+# Application is either "master" for master volume, the application name "spotify.exe" (case insensitive) for Spotify
+# (for Windows, this can be found in Task Manager under the "Details" tab), "unmapped" for any and all applications
+# that are currently running, but have not been explicitly assigned a slider. "unmapped" excludes the master channel.
+# Finally, "system" allows you to control the system sound volume.
+
+# Stick to the syntax:
+#<number>:<application>
+# Here, number is the index
+0: master
+1: system
+2: chrome.exe
+3: spotify.exe
+4: unmapped
+
+# Find the device name when the sliders are connected to USB in Device Manager, so that when you switch USB ports,
+# you don't have to change the COM port.
+device name: Arduino Micro
+
+# Indicate the number of sliders you're using:
+sliders: 5
+# Port is only used if the device name can't be found automatically.
+port:COM7
+
+# Make sure this matches the baudrate on the Arduino's Serial.begin() call.
+baudrate:9600
+
+# You can use this to invert the sliders: top is low volume, bottom is high volume.
+inverted:False
+
+# Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
+system in unmapped:True
