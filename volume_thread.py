@@ -6,10 +6,7 @@ the Windows audio system. Reads volume values from the serial connection
 and applies them to the appropriate audio sessions.
 """
 
-import sys
-import time
 import serial
-import logging
 import utils
 from pathlib import Path
 from control import Control
