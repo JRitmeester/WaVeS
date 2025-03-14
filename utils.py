@@ -21,7 +21,6 @@ from pycaw.pycaw import AudioUtilities
 from pathlib import Path
 import logging
 import re
-import utils
 
 
 def get_yaml_dir():
