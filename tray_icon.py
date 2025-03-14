@@ -8,15 +8,11 @@ the volume control thread.
 """
 
 import sys
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
 import utils
 from volume_thread import VolumeThread
 import logging
-from pycaw.pycaw import AudioUtilities
-import re
 import webbrowser
 
 logger = logging.getLogger("root")
@@ -44,18 +40,21 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         # Setup the context menu when you right click the tray icon.
         menu = QtWidgets.QMenu(parent)
+
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.reload)
+
         showdevices = menu.addAction("Show sound devices")
         showdevices.triggered.connect(self.show_devices)
+
         open_config = menu.addAction("Open configuration file")
-        open_config.triggered.connect(self.open_config_file)
+        open_config.triggered.connect(lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt"))
+
         exit_ = menu.addAction("Exit")
         exit_.triggered.connect(self.exit)
+
         self.setContextMenu(menu)
-
-        self.activated.connect(self.onClick)
-
+        self.activated.connect(self.on_click)
         self.thread = VolumeThread()
 
     def std_err_post(self, msg):
@@ -65,20 +64,19 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         if self.err_box is None:
             self.err_box = QMessageBox()
             # Both OK and window delete fire the 'finished' signal
-            self.err_box.finished.connect(self.clear_err_box)
+            self.err_box.finished.connect(lambda: self.err_box.setText(""))
+            
         # A single error is sent as a string of separate stderr .write() messages,
         # so concatenate them.
         self.err_box.setWindowTitle("Runtime Error")
         self.err_box.setIcon(QMessageBox.Critical)
         self.err_box.setText(self.err_box.text() + msg)
+
         # .show() is used here because .exec() or .exec_() create multiple
         # MessageBoxes.
         self.err_box.show()
 
-    def clear_err_box(self):
-        self.err_box.setText("")
-
-    def onClick(self, reason):
+    def on_click(self, reason):
         if reason == self.Trigger:  # LMB
             self.reload()
 
@@ -94,10 +92,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         sound_devices = utils.get_devices()
         text = "Note that these are both input and output devices!\n\n" + "\n".join(sorted(set(sound_devices)))
         QMessageBox.information(None, "Sound devices", text)
-
-    @staticmethod
-    def open_config_file(self):
-        webbrowser.open(utils.get_appdata_path() / "mapping.txt")
 
     def start_app(self):
         """
