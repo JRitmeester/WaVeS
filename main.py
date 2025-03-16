@@ -155,6 +155,7 @@ if __name__ == "__main__":
             "executable.",
         )
         sys.exit(0)
+        
 
     icon: QtGui.QIcon = QtGui.QIcon(str(icon_dir))
     tray_icon: SystemTrayIcon = SystemTrayIcon(icon, w)
