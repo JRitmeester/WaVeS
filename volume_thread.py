@@ -11,7 +11,7 @@ import utils
 from pathlib import Path
 from control import Control
 
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, QTimer
 from PyQt5.QtWidgets import QMessageBox
 
 logger = utils.get_logger()
@@ -57,6 +57,14 @@ class VolumeThread(QThread):
                 "task manager.",
             )
             raise
+        
+        if self.control.reload_interval > 0:
+            self.reload_timer = QTimer()
+            self.reload_timer.timeout.connect(self.control.get_sessions)
+            self.reload_timer.start(self.control.reload_interval * 1000)
+
+    def reload_sessions(self):
+        self.control.get_sessions()
 
     def run(self):
         logger.info("Entering thread loop.")

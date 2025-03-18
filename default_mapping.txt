@@ -32,3 +32,6 @@ inverted:False
 
 # Set this to true if you want system sounds included in 'unmapped' if system sounds aren't assigned anywhere else.
 system in unmapped:True
+
+# Determine how often to reload the sessions for newly opened applications in seconds.
+session reload interval:1

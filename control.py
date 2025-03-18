@@ -75,6 +75,7 @@ class Control:
         self.port = self.get_port()
         self.baudrate = self.get_setting("baudrate")
         self.inverted = self.get_setting("inverted").lower() == "true"
+        self.reload_interval = int(self.get_setting("session reload interval"))
 
         self.get_mapping()
 
