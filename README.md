@@ -58,7 +58,7 @@ Upon running the [executable](https://github.com/JRitmeester/WaVeS/releases/down
 You are free to use the source code. The repository contains a `buid.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.
 
 ## Contributing
-This was really a side project that escalated, up to the point that I wanted to release it and put too much time into it. As such, I will probably not include any suggestions into the app, also due to time constraints.
+In order to clone the project and set it up, you can run `poetry install` which should work for the most part. However PyQt5 is annoying and requires manual installation afterwards using `poetry run pip install pyqt5`.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

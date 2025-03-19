@@ -6,3 +6,4 @@
 /main.exe
 *.pyc
 *.spec
+requirements.txt
