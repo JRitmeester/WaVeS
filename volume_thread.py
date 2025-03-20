@@ -14,7 +14,6 @@ from control import Control
 from PyQt5.QtCore import QThread, QTimer
 from PyQt5.QtWidgets import QMessageBox
 
-logger = utils.get_logger()
 
 
 class VolumeThread(QThread):
@@ -41,13 +40,10 @@ class VolumeThread(QThread):
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
-        logger.info("Creating volume thread.")
         self.running = True
         self.control = Control(Path.cwd() / 'mapping.txt')
-        logger.info("Setting up serial communication.")
         try:
             self.arduino = serial.Serial(self.control.port, self.control.baudrate, timeout=0.1)
-            logger.info(self.arduino)
         except serial.SerialException:
             QMessageBox.critical(
                 None,
@@ -67,7 +63,6 @@ class VolumeThread(QThread):
         self.control.get_sessions()
 
     def run(self):
-        logger.info("Entering thread loop.")
         while self.running:
             if self.control.sessions is not None:
                 # Data is formatted as "<val>|<val>|<val>|<val>|<val>"

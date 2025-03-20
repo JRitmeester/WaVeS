@@ -2,19 +2,17 @@
 WaVeS (Windows Volume Slider) - A PyQt5-based application for controlling Windows audio volumes using Arduino sliders.
 
 This module serves as the main entry point for the WaVeS application. It initializes the system tray interface,
-sets up logging, and handles application configuration. The application allows users to control various audio 
+and handles application configuration. The application allows users to control various audio 
 channels (master, system, and individual applications) using physical Arduino-based sliders.
 
 Key Features:
 - System tray integration for easy access
 - Configurable audio channel mapping
 - Arduino-based volume control integration
-- Logging system for debugging
 - Error handling and reporting
 """
 
 import datetime
-import logging
 import sys
 import traceback
 import types
@@ -28,15 +26,11 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 import utils
 from tray_icon import SystemTrayIcon
 
-logger = utils.get_logger()
-
 try:
     default_mapping_txt = (Path.cwd() / "default_mapping.txt").read_text()
 except FileNotFoundError:
-    logger.error("default_mapping.txt not found")
     default_mapping_txt = ""  # Or some default configuration
 except Exception as e:
-    logger.error(f"Error reading default_mapping.txt: {e}")
     default_mapping_txt = ""
 
 
@@ -68,14 +62,13 @@ def except_hook(cls: type[BaseException],
                 exception: BaseException, 
                 traceback: types.TracebackType) -> None:
     """
-    Global exception handler that logs uncaught exceptions.
+    Global exception handler.
     
     Args:
         cls: Exception class
         exception: Exception instance
         traceback: Traceback object
     """
-    logger.critical("Uncaught exception", exc_info=(cls, exception, traceback))
     sys.excepthook(cls, exception, traceback)
 
 
@@ -108,31 +101,6 @@ if __name__ == "__main__":
 
     if not appdata_path.exists():
         initialise(appdata_path)
-
-    ## LOGGER STUFF
-    # Create the logs directory if it doesn't exist yet.
-    log_path: Path = appdata_path / "logs"
-    if not log_path.is_dir():
-        log_path.mkdir(parents=True)
-
-    # Delete all the logs except for the 5 most recent ones.
-    all_logs: list[Path] = list(filter(Path.is_file, log_path.glob("**/*")))
-    most_recent_logs: list[Path] = sorted(all_logs, key=lambda x: x.stat().st_ctime, reverse=True)[:5]
-    logs_to_delete: list[Path] = [log for log in all_logs if log not in most_recent_logs]
-    for log in logs_to_delete:
-        log.unlink()
-
-    # Setup the logger
-    logger: logging.Logger = utils.get_logger()
-    logger.setLevel(logging.DEBUG)
-
-    # Create the logger file handler to write the logs to file.
-    handler: logging.FileHandler = logging.FileHandler(log_path / f'WVSM-{datetime.datetime.now().strftime("%d%m%y-%H%M%S")}.log')
-    handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
-    logger.addHandler(handler)
-
-    logger.info("=" * 50)
-    logger.info("Running WaVeS...")
 
     ## ERROR STUFF
     old_excepthook = sys.excepthook
@@ -177,6 +145,5 @@ if __name__ == "__main__":
             "Error during start-up",
             f"An error occurred during start-up:\n\n{traceback.format_exc()}",
         )
-        logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
 
     sys.exit(app.exec())

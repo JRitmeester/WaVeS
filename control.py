@@ -23,6 +23,7 @@ import re
 from pprint import pprint
 
 
+
 class Control:
     """
     Main controller class for audio session management and hardware integration.
@@ -106,8 +107,13 @@ class Control:
         Raises:
             ValueError: If the setting is not found
         """
-        setting = list(filter(lambda x: text + ":" in x, self.lines))[0]
-        return re.sub(r"^[a-zA-Z0-9]*: *", "", setting)
+        print(f"Getting setting: {text}")
+        print(f"Lines: {self.lines}")
+        filtered_settings = list(filter(lambda x: text + ":" in x, self.lines))
+        if not filtered_settings:
+            raise ValueError(f"Setting '{text}' not found in configuration.")
+        setting = filtered_settings[0]
+        return re.sub(r"^[^:]*: *", "", setting)
 
     def get_mapping(self):
         self.load_config()

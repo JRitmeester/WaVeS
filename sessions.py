@@ -7,7 +7,6 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
 import utils
 from MyAudioUtilities import MyAudioUtilities
 
-logger = utils.get_logger()
 
 
 class Session:
@@ -153,7 +152,6 @@ class Device(Session):
         speaker = MyAudioUtilities.GetSpeaker(self.selected_device.id)
         interface = speaker.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
-        logger.info(f'Selected "{self}" for "{device_name.strip()}"')
 
     def __repr__(self):
         return str(self.selected_device)

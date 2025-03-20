@@ -12,10 +12,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from volume_thread import VolumeThread
-import logging
 import webbrowser
 
-logger = logging.getLogger("root")
 
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
@@ -85,7 +83,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         self.thread.control.get_mapping()
 
     def exit(self):
-        logger.info("Quitting application.")
         sys.exit(0)
 
     def show_devices(self):
@@ -99,5 +96,4 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         Start the event loop to parse incoming data from the volume sliders. Stops the vc thread and systray thread once
         :return:
         """
-        logger.info("Starting application.")
         self.thread.start()
