@@ -7,3 +7,5 @@
 *.pyc
 *.spec
 requirements.txt
+build/*
+dist/*
