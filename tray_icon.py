@@ -8,12 +8,12 @@ the volume control thread.
 """
 
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from volume_thread import VolumeThread
 import webbrowser
-
+from pathlib import Path
 
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
@@ -28,16 +28,33 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         err_box: Error message dialog box
         thread (VolumeThread): Thread handling volume control operations
     """
-    def __init__(self, icon, parent=None):
+    def __init__(self):
+
+        # TODO: Double check icon path logic.
+        icon_dir: Path = Path.cwd() / "WaVeS/spec/icon.ico"  # For testing the compiled version in the dist folder
+        if not icon_dir.is_file():
+            icon_dir = Path.cwd() / "icon.ico"
+        if not icon_dir.is_file():
+            QMessageBox.critical(
+                None,
+                "Icon not found",
+                """Could not find the icon for the system tray. Please make sure 
+                there is a file "icon.ico" in the same directory as the 
+                executable.""",
+            )
+            sys.exit(0)
+        
+        icon: QtGui.QIcon = QtGui.QIcon(str(icon_dir))
+        parent: QtWidgets.QWidget = QtWidgets.QWidget()
+        
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
-        self.icon = icon
         self.setToolTip("Windows Volume Slider Manager")
 
         # Setup the error window
-        self.err_box = None
+        self.err_box: QMessageBox = None
 
         # Setup the context menu when you right click the tray icon.
-        menu = QtWidgets.QMenu(parent)
+        menu: QtWidgets.QMenu = QtWidgets.QMenu(parent)
 
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.reload)
@@ -53,7 +70,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         self.setContextMenu(menu)
         self.activated.connect(self.on_click)
-        self.thread = VolumeThread()
+        self.thread: VolumeThread = VolumeThread()
 
     def std_err_post(self, msg):
         """
@@ -79,7 +96,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
             self.reload()
 
     def reload(self):
-        self.showMessage("Volume Slider Manager", "Reloading slider mappings...", self.icon)
         self.thread.control.get_mapping()
 
     def exit(self):
