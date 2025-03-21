@@ -14,12 +14,11 @@ Key Features:
 
 import sys
 import traceback
-import types
 from pathlib import Path
 import webbrowser
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
-import utils
+import utils as utils
 from tray_icon import SystemTrayIcon
 
 try:
@@ -59,7 +58,6 @@ if __name__ == "__main__":
     if not appdata_path.exists():
         initialise(appdata_path)
 
-    ## APP STUFF
     app: QApplication = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     

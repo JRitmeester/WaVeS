@@ -10,7 +10,7 @@ the volume control thread.
 import sys
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox
-import utils
+import utils as utils
 from volume_thread import VolumeThread
 import webbrowser
 from pathlib import Path

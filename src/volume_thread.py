@@ -7,7 +7,7 @@ and applies them to the appropriate audio sessions.
 """
 
 import serial
-import utils
+import utils as utils
 from pathlib import Path
 from control import Control
 

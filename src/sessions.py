@@ -4,7 +4,7 @@ from typing import List
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
 
-import utils
+import utils as utils
 from MyAudioUtilities import MyAudioUtilities
 
 
@@ -67,9 +67,6 @@ class SessionGroup:
             return any([s.session == item for s in self.sessions])
         elif type(item) == int:
             return any([s.idx == item for s in self.sessions])
-
-    def add_session(self, session: AudioSession):
-        self.sessions.append(Session(self.group_idx, session))
 
     def set_volume(self, value):
         for session in self.sessions:

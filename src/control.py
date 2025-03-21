@@ -12,16 +12,12 @@ and volume control operations.
 from pathlib import Path
 from typing import Union
 
-from PyQt5.QtWidgets import QMessageBox
 from pycaw.pycaw import AudioUtilities
 from serial.tools import list_ports
 
-import utils
+import utils as utils
 from sessions import SessionGroup, Master, Session, System, Device
-import webbrowser
 import re
-from pprint import pprint
-
 
 
 class Control:
