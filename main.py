@@ -96,9 +96,8 @@ def initialise(path: Path) -> None:
     QMessageBox.information(
         None,
         "New config file created",
-        f"A new config file was created for you in the same directory as the app:\n\n{str(path)}."
-        f"\n\nIt will now be opened for you to view the settings.\n\nUse the system tray icon > "
-        f'"Show sound devices" to see the sound device names if needed.',
+        f"""A new config file was created for you in the same directory as the app:\n\n{str(path)}.
+        It will now be opened for you to view the settings."""
     )
     webbrowser.open(path)
 

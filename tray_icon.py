@@ -44,9 +44,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.reload)
 
-        showdevices = menu.addAction("Show sound devices")
-        showdevices.triggered.connect(self.show_devices)
-
         open_config = menu.addAction("Open configuration file")
         open_config.triggered.connect(lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt"))
 
@@ -87,11 +84,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     def exit(self):
         logger.info("Quitting application.")
         sys.exit(0)
-
-    def show_devices(self):
-        sound_devices = utils.get_devices()
-        text = "Note that these are both input and output devices!\n\n" + "\n".join(sorted(set(sound_devices)))
-        QMessageBox.information(None, "Sound devices", text)
 
     def start_app(self):
         """
