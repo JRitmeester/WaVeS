@@ -223,8 +223,9 @@ class Control:
         return list(self.sessions.values())
 
     def set_volume(self, values: list):
+        if len(values) != self.sliders:
+            return
         for index, app in self.sessions.items():
-            print(values)
             volume = values[index] / 1023
             if self.inverted:
                 volume = 1 - volume
