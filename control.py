@@ -184,36 +184,25 @@ class Control:
                 # If one or more of the targeted applications are active, add a SessionGroup with them.
                 if len(active_sessions_in_group) > 0:
                     session_dict[idx] = SessionGroup(sessions=active_sessions_in_group)
+                    # Mark all sessions in the group as mapped
+                    for session in active_sessions_in_group:
+                        self.session_manager.mapped_sessions[session.name] = True
 
         # Finally, if indicated with "unmapped", create a SessionGroup for all active audio session that haven't
         # been mapped before.
         if "unmapped" in self.target_idxs.keys():
             unmapped_idx = self.target_idxs["unmapped"]
             unmapped_sessions = [s for s in self.session_manager.software_sessions.values() if not self.session_manager.mapped_sessions[s.name]]
-            if self.get_setting("system in unmapped").lower() == "true" and self.session_manager.system_session in unmapped_sessions:
+            if self.get_setting("system in unmapped").lower() == "true" and not self.session_manager.mapped_sessions["system"]:
                 unmapped_sessions.append(self.session_manager.system_session)
 
             session_dict[unmapped_idx] = SessionGroup(sessions=unmapped_sessions)
+            # Mark all unmapped sessions as now mapped
+            for session in unmapped_sessions:
+                self.session_manager.mapped_sessions[session.name] = True
 
         self.sessions = session_dict
 
-    def find_session(self, session_name: str, case_sensitive: bool = False) -> Union[Session, None]:
-        """
-        Finds a session with "session_name", if it exists. Can be searched for with case sensitivity if needed.
-        :param session_name: Name of the Process object of the session, like "chrome.exe" or "Spotify.exe".
-        Case insensitive by default.
-        :param case_sensitive: Boolean flag to search for "session_name" with case sensitivity.
-        :return: The Session with name "session_name" if it exists, None otherwise.
-        """
-        for idx, session in self.sessions.items():
-            if not case_sensitive:
-                if session.name.lower() == session_name.lower():
-                    return session
-            else:
-                if session.name == session_name:
-                    return session
-        else:
-            return None
 
     def get_sessions(self) -> list:
         """

@@ -76,10 +76,10 @@ class SessionGroup:
 
     def set_volume(self, value):
         for session in self.sessions:
-            session.volume.SetMasterVolume(value, None)
+            session.set_volume(value)
 
     def get_volume(self):
-        return [session.volume.GetMasterVolume() for session in self.sessions]
+        return [session.get_volume() for session in self.sessions]
 
 
 
