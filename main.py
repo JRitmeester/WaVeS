@@ -102,8 +102,32 @@ def initialise(path: Path) -> None:
     )
     webbrowser.open(path)
 
+def print_entire_directory_recursively(path: Path) -> None:
+    """
+    Output the entire directory recursively to a file.
+    """
+    with open("directory.txt", "w") as f:
+        for file in path.glob("**/*"):
+            f.write(str(file) + "\n")
+
+def get_icon_path():
+    if getattr(sys, 'frozen', False):
+        # Running in a PyInstaller bundle
+        base_path = Path(sys._MEIPASS)
+        icon_dir = base_path / "icon.ico"
+    else:
+        # Running in normal Python environment
+        icon_dir = Path.cwd() / "WaVeS/spec/icon.ico"
+        if not icon_dir.is_file():
+            icon_dir = Path.cwd() / "icon.ico"
+    
+    if not icon_dir.is_file():
+        raise FileNotFoundError("Icon not found")
+    
+    return icon_dir
 
 if __name__ == "__main__":
+    print_entire_directory_recursively(Path.cwd())
     appdata_path: Path = utils.get_appdata_path()
 
     if not appdata_path.exists():
@@ -143,21 +167,7 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     w: QtWidgets.QWidget = QtWidgets.QWidget()
 
-    icon_dir: Path = Path.cwd() / "WaVeS/spec/icon.ico"  # For testing the compiled version in the dist folder
-    if not icon_dir.is_file():
-        icon_dir = Path.cwd() / "icon.ico"
-    if not icon_dir.is_file():
-        QMessageBox.critical(
-            None,
-            "Icon not found",
-            "Could not find the icon for the system tray. Please make sure "
-            'there is a file "icon.ico" in the same directory as the '
-            "executable.",
-        )
-        sys.exit(0)
-        
-
-    icon: QtGui.QIcon = QtGui.QIcon(str(icon_dir))
+    icon: QtGui.QIcon = QtGui.QIcon(str(get_icon_path()))
     tray_icon: SystemTrayIcon = SystemTrayIcon(icon, w)
 
     # Create the stderr handler and point stderr to it

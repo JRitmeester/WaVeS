@@ -1,10 +1,7 @@
-/WaVeS/build/
-/WaVeS/dist/
-/WaVeS/main.spec
 /.idea/
-/WaVeS/
-/main.exe
 *.pyc
 *.spec
-requirements.txt
 .vscode/launch.json
+/build/*
+!/build/waves.spec
+!/build/build.bat
