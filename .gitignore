@@ -1,7 +1,5 @@
 /.idea/
 *.pyc
-*.spec
 .vscode/launch.json
 /build/*
-!/build/waves.spec
-!/build/build.bat
+/dist/*
