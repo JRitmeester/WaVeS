@@ -102,14 +102,6 @@ def initialise(path: Path) -> None:
     )
     webbrowser.open(path)
 
-def print_entire_directory_recursively(path: Path) -> None:
-    """
-    Output the entire directory recursively to a file.
-    """
-    with open("directory.txt", "w") as f:
-        for file in path.glob("**/*"):
-            f.write(str(file) + "\n")
-
 def get_icon_path():
     if getattr(sys, 'frozen', False):
         # Running in a PyInstaller bundle
@@ -127,7 +119,6 @@ def get_icon_path():
     return icon_dir
 
 if __name__ == "__main__":
-    print_entire_directory_recursively(Path.cwd())
     appdata_path: Path = utils.get_appdata_path()
 
     if not appdata_path.exists():
