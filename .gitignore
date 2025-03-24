@@ -7,3 +7,4 @@
 *.pyc
 *.spec
 requirements.txt
+.vscode/launch.json

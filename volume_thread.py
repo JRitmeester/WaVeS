@@ -6,6 +6,7 @@ the Windows audio system. Reads volume values from the serial connection
 and applies them to the appropriate audio sessions.
 """
 
+import sys
 import serial
 import utils
 from pathlib import Path
@@ -56,7 +57,7 @@ class VolumeThread(QThread):
                 "that another instance is already running. Please check the system tray or the "
                 "task manager.",
             )
-            raise
+            sys.exit(0)
         
         if self.control.reload_interval > 0:
             self.reload_timer = QTimer()

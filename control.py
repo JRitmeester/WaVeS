@@ -106,8 +106,14 @@ class Control:
         Raises:
             ValueError: If the setting is not found
         """
-        setting = list(filter(lambda x: text + ":" in x, self.lines))[0]
-        return re.sub(r"^[a-zA-Z0-9]*: *", "", setting)
+        matching_settings = list(filter(lambda x: text + ":" in x, self.lines))
+        if len(matching_settings) == 0:
+            raise ValueError(f"Setting {text} is not found in the configuration file.")
+        # Use .*: ?(.*) to get the value of the setting
+        value = re.search(r"^.*: ?(.*)", matching_settings[0])
+        if value.group(1) == "":
+            raise ValueError(f"Setting {text} is not found in the configuration file.")
+        return value.group(1)
 
     def get_mapping(self):
         self.load_config()
