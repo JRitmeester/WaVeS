@@ -10,6 +10,8 @@ import sys
 import serial
 from control import Control
 from config_manager import ConfigManager
+from mapping_manager import MappingManager
+from session_manager import SessionManager
 from pathlib import Path
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
@@ -39,13 +41,20 @@ class VolumeThread(QThread):
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
-        self.control = Control()
-        
+
         self.config_manager = ConfigManager(
             Path.home() / "AppData/Roaming" / "WaVeS" / "mapping.txt"
         )
+        self.session_manager = SessionManager()
+        self.mapping_manager = MappingManager()
+
         port = self.config_manager.get_serial_port()
         baudrate = self.config_manager.get_setting("baudrate")
+        self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
+        self.sessions = self.mapping_manager.get_mapping(
+            self.session_manager, self.config_manager
+        )
+
         try:
             self.arduino = serial.Serial(
                 port, baudrate, timeout=0.1
@@ -62,9 +71,15 @@ class VolumeThread(QThread):
 
     def run(self):
         while True:
-            if self.control.sessions is not None:
-                # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
-                data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
-                if data:
-                    values = [float(val) for val in data.split("|")]
-                    self.control.set_volume(values)
+            # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
+            data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
+            if data:
+                values = [float(val) for val in data.split("|")]
+                if len(values) != int(self.config_manager.get_setting("sliders")):
+                    return
+                
+                for index, app in self.sessions.items():
+                    volume = values[index] / 1023
+                    if self.inverted:
+                        volume = 1 - volume
+                    app.set_volume(volume)

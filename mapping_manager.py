@@ -23,8 +23,9 @@ class ConfigManagerProtocol(Protocol):
     def load_config(self) -> None: ...
 
 class MappingManager:
-    def __init__(self, n_sliders: int):
-        self.n_sliders = n_sliders
+    def __init__(self):
+        pass
+
 
     def get_mapping(
         self,
