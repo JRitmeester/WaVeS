@@ -128,11 +128,9 @@ class Control:
 
         session_dict = {}
 
-        
         # Loop through all the targets and the slider indices they are suppposed to map to.
         # A target is the second part of the mapping string, after the first colon (:).
         for target, idx in self.target_idxs.items():
-
             # If the target is a string, it is a single target.
             if type(target) == str:
                 target = target.lower()
@@ -159,7 +157,7 @@ class Control:
 
                     # Check if the application name is found in the current active sessions.
                     if target in self.session_manager.software_sessions:
-                        session = self.session_manager._software_sessions.get(target, None)
+                        session = self.session_manager.software_sessions.get(target, None)
                         if session is not None:  # If there is a session that matches, create a custom Session for it.
                             session_dict[idx] = Session(session)
 
