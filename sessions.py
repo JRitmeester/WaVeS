@@ -4,9 +4,12 @@ from typing import List
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession, AudioDevice
 from abc import ABC, abstractmethod
-
+from _ctypes import COMError
 import utils
 from MyAudioUtilities import MyAudioUtilities
+import warnings
+
+warnings.filterwarnings("ignore", message="COMError attempting to get property.*")
 
 class Session(ABC):
 
@@ -139,7 +142,7 @@ class SystemSession(SoftwareSession):
     def __repr__(self):
         return self.name
 
-class Device(Session):
+class Device(AudioDevice, Session):
     """
     Controls specific audio output devices.
     
@@ -150,30 +153,37 @@ class Device(Session):
         device_name: The specific audio device being controlled
     """
     def __init__(self, pycaw_device: AudioDevice):
-        self.pycaw_device = pycaw_device    
+        # Initialize AudioDevice with all the required fields from the source device
+        AudioDevice.__init__(self, 
+            id=pycaw_device.id,
+            state=pycaw_device.state,
+            properties=pycaw_device.properties,
+            dev=pycaw_device._dev
+        )
+        self.pycaw_device = pycaw_device
+        
         try:
-            # Only initialize if device is active
-            if hasattr(pycaw_device, 'State') and pycaw_device.State == 1:  # DEVICE_STATE_ACTIVE
-                speaker = MyAudioUtilities.GetSpeaker(pycaw_device.id)
-                if speaker:
+            speaker = MyAudioUtilities.GetSpeaker(pycaw_device.id)
+            if speaker:
+                try:
                     self.volume = cast(speaker.Activate(
-                        IAudioEndpointVolume._iid_, 
-                        CLSCTX_ALL, 
-                        None
+                    IAudioEndpointVolume._iid_, 
+                    CLSCTX_ALL, 
+                    None
                     ), POINTER(IAudioEndpointVolume))
-                else:
-                    raise RuntimeError(f"Could not get speaker interface for device: {pycaw_device}")
+                except COMError as e:
+                    pass
             else:
-                raise RuntimeError(f"Device is not active: {pycaw_device}")
+                raise RuntimeError(f"Could not get speaker interface for device: {pycaw_device}")
         except Exception as e:
             raise
 
     def __repr__(self):
-        return str(self.pycaw_device)
+        return f"{self.pycaw_device.FriendlyName} - {self.pycaw_device.state}"
     
     @property
     def name(self) -> str:
-        return str(self.pycaw_device)
+        return self.pycaw_device.FriendlyName
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
