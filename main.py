@@ -107,10 +107,7 @@ def get_icon_path():
         base_path = Path(sys._MEIPASS)
         icon_dir = base_path / "icon.ico"
     else:
-        # Running in normal Python environment
-        icon_dir = Path.cwd() / "WaVeS/spec/icon.ico"
-        if not icon_dir.is_file():
-            icon_dir = Path.cwd() / "icon.ico"
+        icon_dir = Path.cwd() / "resources" / "icon.ico"
     
     if not icon_dir.is_file():
         raise FileNotFoundError("Icon not found")

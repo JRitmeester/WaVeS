@@ -2,15 +2,31 @@ from ctypes import cast, POINTER
 from typing import List
 
 from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession
-
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession, AudioDevice
+from abc import ABC, abstractmethod
+from _ctypes import COMError
 import utils
 from MyAudioUtilities import MyAudioUtilities
+import warnings
 
-logger = utils.get_logger()
+warnings.filterwarnings("ignore", message="COMError attempting to get property.*")
 
+class Session(ABC):
 
-class Session:
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
+    @abstractmethod
+    def set_volume(self, value):
+        pass
+
+    @abstractmethod
+    def get_volume(self):
+        pass
+
+class SoftwareSession(Session):
     """
     Base class for managing individual audio sessions.
     
@@ -21,15 +37,16 @@ class Session:
         volume (SimpleAudioVolume): Volume control interface
     """
 
-    def __init__(self, idx: int, session: AudioSession = None):
-        self.idx = idx
+    def __init__(self, session: AudioSession):
         self.session = session
-        if session is not None and session.Process is not None:  # Filter out System sounds.
-            self.name = session.Process.name()
-            self.volume = self.session.SimpleAudioVolume
+        self.volume = self.session.SimpleAudioVolume
+
+    @property
+    def name(self) -> str:
+        return self.session.Process.name()
 
     def __repr__(self):
-        return f"Session(name={self.name}, index={self.idx})"
+        return f"Session(name={self.name})"
 
     def set_volume(self, value):
         self.volume.SetMasterVolume(value, None)
@@ -37,11 +54,6 @@ class Session:
     def get_volume(self):
         return self.volume.GetMasterVolume()
 
-    def mute(self):
-        self.volume.SetMute(1, None)
-
-    def unmute(self):
-        self.volume.SetMute(0, None)
 
 
 class SessionGroup:
@@ -52,84 +64,85 @@ class SessionGroup:
     or related audio sessions together.
     
     Attributes:
-        group_idx (int): Index for mapping to physical slider
         sessions (List[Session]): List of audio sessions in this group
     """
 
-    def __init__(self, group_idx: int, sessions: List[AudioSession]):
-        self.group_idx = group_idx
-        self.sessions = [Session(group_idx, session) for session in sessions]
+    def __init__(self, sessions: List[Session]):
+        self.sessions = sessions
 
     def __repr__(self):
-        return f"SessionGroup(index={self.group_idx}, " f"sessions={[session.name for session in self.sessions]})"
+        return f"SessionGroup(sessions={[session.name for session in self.sessions]})"
 
     def __contains__(self, item: AudioSession):
         if type(item) == AudioSession:
             return any([s.session == item for s in self.sessions])
-        elif type(item) == int:
-            return any([s.idx == item for s in self.sessions])
-
-    def add_session(self, session: AudioSession):
-        self.sessions.append(Session(self.group_idx, session))
 
     def set_volume(self, value):
         for session in self.sessions:
-            session.volume.SetMasterVolume(value, None)
+            session.set_volume(value)
 
     def get_volume(self):
-        return [session.volume.GetMasterVolume() for session in self.sessions]
-
-    def mute(self):
-        for session in self.sessions:
-            session.volume.SetMute(1, None)
-
-    def unmute(self):
-        for session in self.sessions:
-            session.volume.SetMute(0, None)
+        return [session.get_volume() for session in self.sessions]
 
 
-class Master(Session):
+
+class MasterSession(Session):
     """
     Controls the system master volume.
     
     Provides interface to control the overall system volume level
     using the Windows audio endpoint volume interface.
     """
-    def __init__(self, idx: int):
-        super().__init__(idx=idx)
-
+    def __init__(self):
         # Pycaw code to get the master volume interface
-        devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
-
-        self.name = "Master"
+        self.volume = cast(AudioUtilities.GetSpeakers().Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None), POINTER(IAudioEndpointVolume))
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
 
     def get_volume(self):
         return self.volume.GetMasterVolumeLevelScalar()
+    
+    @property
+    def name(self) -> str:
+        return "master"
 
 
-class System(Session):
+class SystemSession(SoftwareSession):
     """
     Controls system sound effects volume.
     
     Manages volume for Windows system sounds like notifications,
     alerts, and other system audio events.
     """
-    def __init__(self, idx: int, session):
-        super().__init__(idx=idx, session=session)
-        self.name = "System Sounds"
-        self.session = session
-        self.volume = session.SimpleAudioVolume
+    def __init__(self):
+        available_pycaw_sessions = AudioUtilities.GetAllSessions()
+        system_pycaw_session = next(
+            (session for session in available_pycaw_sessions if "SystemRoot" in session.DisplayName),
+            None
+        )
+        if system_pycaw_session is None:
+            raise RuntimeError("System sounds session could not be found.")
+        else:
+            print(f"System sounds session found: {system_pycaw_session}")
+        self.session = system_pycaw_session
+        
+        self.volume = self.session.SimpleAudioVolume
 
+    @property
+    def name(self) -> str:
+        return "system"
+    
+    def set_volume(self, value):
+        super().set_volume(value)
+
+    def get_volume(self):
+        return super().get_volume()
+    
     def __repr__(self):
         return self.name
 
-
-class Device(Session):
+class Device(AudioDevice, Session):
     """
     Controls specific audio output devices.
     
@@ -137,26 +150,40 @@ class Device(Session):
     headphones, or other audio outputs.
     
     Attributes:
-        selected_device: The specific audio device being controlled
+        device_name: The specific audio device being controlled
     """
-    def __init__(self, device_name: str):
-        super().__init__(-1)
-        self.selected_device = None
-
-        devicelist = AudioUtilities.GetAllDevices()
-        for device in devicelist:
-            if device_name.lower() in str(device).lower():
-                self.selected_device = device
-        if self.selected_device is None:
-            raise RuntimeError(f"Sound device {device_name} could not be found. Please correct the name or remove it.")
-
-        speaker = MyAudioUtilities.GetSpeaker(self.selected_device.id)
-        interface = speaker.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
-        logger.info(f'Selected "{self}" for "{device_name.strip()}"')
+    def __init__(self, pycaw_device: AudioDevice):
+        # Initialize AudioDevice with all the required fields from the source device
+        AudioDevice.__init__(self, 
+            id=pycaw_device.id,
+            state=pycaw_device.state,
+            properties=pycaw_device.properties,
+            dev=pycaw_device._dev
+        )
+        self.pycaw_device = pycaw_device
+        
+        try:
+            speaker = MyAudioUtilities.GetSpeaker(pycaw_device.id)
+            if speaker:
+                try:
+                    self.volume = cast(speaker.Activate(
+                    IAudioEndpointVolume._iid_, 
+                    CLSCTX_ALL, 
+                    None
+                    ), POINTER(IAudioEndpointVolume))
+                except COMError as e:
+                    pass
+            else:
+                raise RuntimeError(f"Could not get speaker interface for device: {pycaw_device}")
+        except Exception as e:
+            raise
 
     def __repr__(self):
-        return str(self.selected_device)
+        return f"{self.pycaw_device.FriendlyName} - {self.pycaw_device.state}"
+    
+    @property
+    def name(self) -> str:
+        return self.pycaw_device.FriendlyName
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
