@@ -21,33 +21,35 @@ logger = utils.get_logger()
 class VolumeThread(QThread):
     """
     Thread handling communication with Arduino volume sliders.
-    
+
     Maintains a serial connection to the Arduino device and continuously
     reads volume values to update Windows audio sessions.
-    
+
     Attributes:
         running (bool): Thread control flag
         control (Control): Audio control interface
         arduino (serial.Serial): Serial connection to Arduino
     """
-    
+
     def __init__(self, mapping_dir=None):
         """
         Initialize volume control thread.
-        
+
         Args:
             mapping_dir (Path, optional): Custom mapping directory path
-            
+
         Raises:
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
         logger.info("Creating volume thread.")
         self.running = True
-        self.control = Control(Path.cwd() / 'mapping.txt')
+        self.control = Control()
         logger.info("Setting up serial communication.")
         try:
-            self.arduino = serial.Serial(self.control.port, self.control.baudrate, timeout=0.1)
+            self.arduino = serial.Serial(
+                self.control.port, self.control.baudrate, timeout=0.1
+            )
             logger.info(self.arduino)
         except serial.SerialException:
             QMessageBox.critical(
@@ -58,7 +60,6 @@ class VolumeThread(QThread):
                 "task manager.",
             )
             sys.exit(0)
-
 
     def reload_sessions(self):
         self.control.get_sessions()
