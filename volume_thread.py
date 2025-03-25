@@ -43,7 +43,6 @@ class VolumeThread(QThread):
         """
         super().__init__()
         logger.info("Creating volume thread.")
-        self.running = True
         self.control = Control()
         logger.info("Setting up serial communication.")
         try:
@@ -65,8 +64,7 @@ class VolumeThread(QThread):
         self.control.get_sessions()
 
     def run(self):
-        logger.info("Entering thread loop.")
-        while self.running:
+        while True:
             if self.control.sessions is not None:
                 # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
                 data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
