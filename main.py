@@ -2,7 +2,7 @@
 WaVeS (Windows Volume Slider) - A PyQt5-based application for controlling Windows audio volumes using Arduino sliders.
 
 This module serves as the main entry point for the WaVeS application. It initializes the system tray interface,
-sets up logging, and handles application configuration. The application allows users to control various audio 
+sets up logging, and handles application configuration. The application allows users to control various audio
 channels (master, system, and individual applications) using physical Arduino-based sliders.
 
 Key Features:
@@ -43,10 +43,10 @@ except Exception as e:
 class StdErrHandler(QObject):
     """
     Custom stderr handler that redirects error messages to the GUI.
-    
+
     This class intercepts standard error messages and emits them as Qt signals,
     allowing them to be displayed in the application's GUI interface.
-    
+
     Attributes:
         err_msg (pyqtSignal): Signal emitted when an error message is received
     """
@@ -64,12 +64,12 @@ class StdErrHandler(QObject):
         pass
 
 
-def except_hook(cls: type[BaseException], 
-                exception: BaseException, 
-                traceback: types.TracebackType) -> None:
+def except_hook(
+    cls: type[BaseException], exception: BaseException, traceback: types.TracebackType
+) -> None:
     """
     Global exception handler that logs uncaught exceptions.
-    
+
     Args:
         cls: Exception class
         exception: Exception instance
@@ -82,10 +82,10 @@ def except_hook(cls: type[BaseException],
 def initialise(path: Path) -> None:
     """
     Initialize the application configuration directory and create default mapping file.
-    
+
     Args:
         path (Path): Path where configuration files should be created
-        
+
     Creates the configuration directory and a default mapping.txt file with
     example configurations for audio channel mapping.
     """
@@ -97,22 +97,24 @@ def initialise(path: Path) -> None:
         None,
         "New config file created",
         f"""A new config file was created for you in the same directory as the app:\n\n{str(path)}.
-        It will now be opened for you to view the settings."""
+        It will now be opened for you to view the settings.""",
     )
     webbrowser.open(path)
 
+
 def get_icon_path():
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         # Running in a PyInstaller bundle
         base_path = Path(sys._MEIPASS)
         icon_dir = base_path / "icon.ico"
     else:
         icon_dir = Path.cwd() / "resources" / "icon.ico"
-    
+
     if not icon_dir.is_file():
         raise FileNotFoundError("Icon not found")
-    
+
     return icon_dir
+
 
 if __name__ == "__main__":
     appdata_path: Path = utils.get_appdata_path()
@@ -128,8 +130,12 @@ if __name__ == "__main__":
 
     # Delete all the logs except for the 5 most recent ones.
     all_logs: list[Path] = list(filter(Path.is_file, log_path.glob("**/*")))
-    most_recent_logs: list[Path] = sorted(all_logs, key=lambda x: x.stat().st_ctime, reverse=True)[:5]
-    logs_to_delete: list[Path] = [log for log in all_logs if log not in most_recent_logs]
+    most_recent_logs: list[Path] = sorted(
+        all_logs, key=lambda x: x.stat().st_ctime, reverse=True
+    )[:5]
+    logs_to_delete: list[Path] = [
+        log for log in all_logs if log not in most_recent_logs
+    ]
     for log in logs_to_delete:
         log.unlink()
 
@@ -138,7 +144,9 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     # Create the logger file handler to write the logs to file.
-    handler: logging.FileHandler = logging.FileHandler(log_path / f'WVSM-{datetime.datetime.now().strftime("%d%m%y-%H%M%S")}.log')
+    handler: logging.FileHandler = logging.FileHandler(
+        log_path / f'WVSM-{datetime.datetime.now().strftime("%d%m%y-%H%M%S")}.log'
+    )
     handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
     logger.addHandler(handler)
 
@@ -174,6 +182,8 @@ if __name__ == "__main__":
             "Error during start-up",
             f"An error occurred during start-up:\n\n{traceback.format_exc()}",
         )
-        logger.critical("Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__))
+        logger.critical(
+            "Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__)
+        )
 
     sys.exit(app.exec())

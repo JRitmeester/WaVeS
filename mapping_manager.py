@@ -22,10 +22,10 @@ class ConfigManagerProtocol(Protocol):
     def get_setting(self, text: str) -> str: ...
     def load_config(self) -> None: ...
 
+
 class MappingManager:
     def __init__(self):
         pass
-
 
     def get_mapping(
         self,
@@ -34,9 +34,7 @@ class MappingManager:
     ) -> Dict[int, Session]:
         """Update session mappings"""
         config_manager.load_config()
-        return self.create_mappings(
-            session_manager, config_manager
-        )
+        return self.create_mappings(session_manager, config_manager)
 
     def create_mappings(
         self,
@@ -76,7 +74,9 @@ class MappingManager:
 
         return session_dict
 
-    def get_target_indices(self, config_manager: ConfigManagerProtocol) -> Dict[str, int]:
+    def get_target_indices(
+        self, config_manager: ConfigManagerProtocol
+    ) -> Dict[str, int]:
         """Get mapping of targets to slider indices from config"""
         target_indices = {}
         for idx in range(int(config_manager.get_setting("sliders"))):
@@ -87,7 +87,7 @@ class MappingManager:
                 )
             target_indices[application_str] = int(idx)
         return target_indices
-    
+
     def _add_single_target_mapping(
         self,
         target: str,
