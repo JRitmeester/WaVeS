@@ -51,18 +51,11 @@ class Control:
         Initialize the Control instance.
         """
 
-        # Initialize managers
-        self.config_manager = ConfigManager(
-            Path.home() / "AppData/Roaming" / "WaVeS" / "mapping.txt"
-        )
         self.session_manager = SessionManager()
         self.mapping_manager = MappingManager(
             n_sliders=int(self.config_manager.get_setting("sliders"))
         )
 
-        # Initialize control parameters
-        self.port = self.config_manager.get_serial_port()
-        self.baudrate = self.config_manager.get_setting("baudrate")
         self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
         self.reload_interval = int(
             self.config_manager.get_setting("session reload interval")

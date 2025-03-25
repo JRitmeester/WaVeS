@@ -9,7 +9,8 @@ and applies them to the appropriate audio sessions.
 import sys
 import serial
 from control import Control
-
+from config_manager import ConfigManager
+from pathlib import Path
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
 
@@ -39,9 +40,15 @@ class VolumeThread(QThread):
         """
         super().__init__()
         self.control = Control()
+        
+        self.config_manager = ConfigManager(
+            Path.home() / "AppData/Roaming" / "WaVeS" / "mapping.txt"
+        )
+        port = self.config_manager.get_serial_port()
+        baudrate = self.config_manager.get_setting("baudrate")
         try:
             self.arduino = serial.Serial(
-                self.control.port, self.control.baudrate, timeout=0.1
+                port, baudrate, timeout=0.1
             )
         except serial.SerialException:
             QMessageBox.critical(
