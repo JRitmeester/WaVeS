@@ -8,14 +8,13 @@ and applies them to the appropriate audio sessions.
 
 import sys
 import serial
-import utils
-from pathlib import Path
 from control import Control
-
-from PyQt5.QtCore import QThread, QTimer
+from config_manager import ConfigManager
+from mapping_manager import MappingManager
+from session_manager import SessionManager
+from pathlib import Path
+from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
-
-logger = utils.get_logger()
 
 
 class VolumeThread(QThread):
@@ -31,7 +30,7 @@ class VolumeThread(QThread):
         arduino (serial.Serial): Serial connection to Arduino
     """
 
-    def __init__(self, mapping_dir=None):
+    def __init__(self):
         """
         Initialize volume control thread.
 
@@ -42,15 +41,24 @@ class VolumeThread(QThread):
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
-        logger.info("Creating volume thread.")
-        self.running = True
-        self.control = Control()
-        logger.info("Setting up serial communication.")
+
+        self.config_manager = ConfigManager(
+            Path.home() / "AppData/Roaming" / "WaVeS" / "mapping.txt"
+        )
+        self.session_manager = SessionManager()
+        self.mapping_manager = MappingManager()
+
+        port = self.config_manager.get_serial_port()
+        baudrate = self.config_manager.get_setting("baudrate")
+        self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
+        self.sessions = self.mapping_manager.get_mapping(
+            self.session_manager, self.config_manager
+        )
+
         try:
             self.arduino = serial.Serial(
-                self.control.port, self.control.baudrate, timeout=0.1
+                port, baudrate, timeout=0.1
             )
-            logger.info(self.arduino)
         except serial.SerialException:
             QMessageBox.critical(
                 None,
@@ -61,15 +69,17 @@ class VolumeThread(QThread):
             )
             sys.exit(0)
 
-    def reload_sessions(self):
-        self.control.get_sessions()
-
     def run(self):
-        logger.info("Entering thread loop.")
-        while self.running:
-            if self.control.sessions is not None:
-                # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
-                data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
-                if data:
-                    values = [float(val) for val in data.split("|")]
-                    self.control.set_volume(values)
+        while True:
+            # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
+            data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
+            if data:
+                values = [float(val) for val in data.split("|")]
+                if len(values) != int(self.config_manager.get_setting("sliders")):
+                    return
+                
+                for index, app in self.sessions.items():
+                    volume = values[index] / 1023
+                    if self.inverted:
+                        volume = 1 - volume
+                    app.set_volume(volume)
