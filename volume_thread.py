@@ -58,11 +58,7 @@ class VolumeThread(QThread):
                 "task manager.",
             )
             sys.exit(0)
-        
-        if self.control.reload_interval > 0:
-            self.reload_timer = QTimer()
-            self.reload_timer.timeout.connect(self.control.get_sessions)
-            self.reload_timer.start(self.control.reload_interval * 1000)
+
 
     def reload_sessions(self):
         self.control.get_sessions()
