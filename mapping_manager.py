@@ -30,7 +30,6 @@ class MappingManager:
         self,
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
-        target_indices: Dict[Any, int],
     ) -> Dict[int, Session]:
         """
         Create mappings between sliders and sessions
@@ -40,6 +39,9 @@ class MappingManager:
             config_manager: Provider of configuration information
             target_indices: Dictionary mapping targets to slider indices
         """
+
+        target_indices = self.get_target_indices(config_manager)
+
         session_dict = {}
 
         # Process each target mapping
@@ -62,6 +64,18 @@ class MappingManager:
 
         return session_dict
 
+    def get_target_indices(self, config_manager: ConfigManagerProtocol) -> Dict[str, int]:
+        """Get mapping of targets to slider indices from config"""
+        target_indices = {}
+        for idx in range(int(config_manager.get_setting("sliders"))):
+            application_str = config_manager.get_setting(str(idx))
+            if "," in application_str:
+                application_str = tuple(
+                    app.strip() for app in application_str.split(",")
+                )
+            target_indices[application_str] = int(idx)
+        return target_indices
+    
     def _add_single_target_mapping(
         self,
         target: str,

@@ -74,22 +74,10 @@ class Control:
     def get_mapping(self):
         """Update session mappings"""
         self.config_manager.load_config()
-        target_indices = self._get_target_indices()
         return self.mapping_manager.create_mappings(
-            self.session_manager, self.config_manager, target_indices
+            self.session_manager, self.config_manager
         )
 
-    def _get_target_indices(self):
-        """Get mapping of targets to slider indices from config"""
-        target_indices = {}
-        for idx in range(int(self.config_manager.get_setting("sliders"))):
-            application_str = self.config_manager.get_setting(str(idx))
-            if "," in application_str:
-                application_str = tuple(
-                    app.strip() for app in application_str.split(",")
-                )
-            target_indices[application_str] = int(idx)
-        return target_indices
 
     def get_sessions(self) -> list:
         """
