@@ -1,5 +1,6 @@
 from sessions import SessionGroup, MasterSession, Session, SystemSession, Device, SoftwareSession
 from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
+from pycaw.constants import AudioDeviceState
 
 class SessionManager:
 
@@ -46,15 +47,12 @@ class SessionManager:
 
     def create_device_sessions(self):
         for pycaw_device in self.all_pycaw_devices:
-            try:
-                # Only process active/enabled devices
-                if pycaw_device.State == 1:  # 1 typically means DEVICE_STATE_ACTIVE
-                    device = Device(pycaw_device)
-                    self.mapped_sessions[device.name] = False
-                    self.devices[device.name] = device
-            except Exception as e:
-                print(f"Failed to initialize device {pycaw_device}: {str(e)}")
+            # try:
+            if pycaw_device.FriendlyName == None or pycaw_device.state == AudioDeviceState.NotPresent:
                 continue
+            device = Device(pycaw_device)
+            self.mapped_sessions[device.name] = False
+            self.devices[device.name] = device
 
     def get_device_session(self, device_name: str) -> Device:
         device = self.devices.get(device_name, None)
