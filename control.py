@@ -69,23 +69,10 @@ class Control:
         )
 
         # Get initial mappings
-        self.sessions = self.get_mapping()
-
-    def get_mapping(self):
-        """Update session mappings"""
-        self.config_manager.load_config()
-        return self.mapping_manager.create_mappings(
+        self.sessions = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
-
-
-    def get_sessions(self) -> list:
-        """
-        Returns all the currently mapped audio sessions.
-        :return: List of all sessions that are currently mapped.
-        """
-        return list(self.sessions.values())
-
+       
     def set_volume(self, values: list):
         if len(values) != int(self.config_manager.get_setting("sliders")):
             return

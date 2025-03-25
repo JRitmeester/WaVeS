@@ -8,14 +8,10 @@ and applies them to the appropriate audio sessions.
 
 import sys
 import serial
-import utils
-from pathlib import Path
 from control import Control
 
-from PyQt5.QtCore import QThread, QTimer
+from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
-
-logger = utils.get_logger()
 
 
 class VolumeThread(QThread):
@@ -31,7 +27,7 @@ class VolumeThread(QThread):
         arduino (serial.Serial): Serial connection to Arduino
     """
 
-    def __init__(self, mapping_dir=None):
+    def __init__(self):
         """
         Initialize volume control thread.
 
@@ -42,14 +38,11 @@ class VolumeThread(QThread):
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
-        logger.info("Creating volume thread.")
         self.control = Control()
-        logger.info("Setting up serial communication.")
         try:
             self.arduino = serial.Serial(
                 self.control.port, self.control.baudrate, timeout=0.1
             )
-            logger.info(self.arduino)
         except serial.SerialException:
             QMessageBox.critical(
                 None,
@@ -59,9 +52,6 @@ class VolumeThread(QThread):
                 "task manager.",
             )
             sys.exit(0)
-
-    def reload_sessions(self):
-        self.control.get_sessions()
 
     def run(self):
         while True:

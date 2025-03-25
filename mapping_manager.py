@@ -20,11 +20,22 @@ class ConfigManagerProtocol(Protocol):
     """Define the interface we expect from ConfigManager"""
 
     def get_setting(self, text: str) -> str: ...
-
+    def load_config(self) -> None: ...
 
 class MappingManager:
     def __init__(self, n_sliders: int):
         self.n_sliders = n_sliders
+
+    def get_mapping(
+        self,
+        session_manager: SessionManagerProtocol,
+        config_manager: ConfigManagerProtocol,
+    ) -> Dict[int, Session]:
+        """Update session mappings"""
+        config_manager.load_config()
+        return self.create_mappings(
+            session_manager, config_manager
+        )
 
     def create_mappings(
         self,
