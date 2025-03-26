@@ -49,7 +49,7 @@ class VolumeThread(QThread):
         port = self.config_manager.get_serial_port()
         baudrate = self.config_manager.get_setting("baudrate")
         self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
-        self.sessions = self.mapping_manager.get_mapping(
+        self.mapping = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
 
@@ -65,6 +65,11 @@ class VolumeThread(QThread):
             )
             sys.exit(0)
 
+    def reload_mapping(self):
+        self.mapping = self.mapping_manager.get_mapping(
+            self.session_manager, self.config_manager
+        )
+
     def run(self):
         while True:
             print("Reading data from Arduino")
@@ -74,7 +79,7 @@ class VolumeThread(QThread):
                 values = [float(val) for val in data.split("|")]
                 if len(values) != int(self.config_manager.get_setting("sliders")):
                     return
-                for index, app in self.sessions.items():
+                for index, app in self.mapping.items():
                     volume = values[index] / 1023
                     if self.inverted:
                         volume = 1 - volume
