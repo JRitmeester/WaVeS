@@ -27,6 +27,7 @@ from volume_thread import VolumeThread
 
 logger = utils.get_logger()
 
+
 def setup_gui(
     w: QtWidgets.QWidget,
     volume_thread: VolumeThread,

@@ -8,15 +8,11 @@ and applies them to the appropriate audio sessions.
 
 import sys
 import serial
-from config_manager import ConfigManager
-from mapping_manager import MappingManager
-from session_manager import SessionManager
-from pathlib import Path
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
-from protocols.config_protocol import ConfigManagerProtocol
-from protocols.session_protocol import SessionManagerProtocol
-from protocols.mapping_protocol import MappingManagerProtocol
+from sessions import SessionManagerProtocol
+from config import ConfigManagerProtocol
+from mapping import MappingManagerProtocol
 
 
 class VolumeThread(QThread):
@@ -71,6 +67,7 @@ class VolumeThread(QThread):
 
     def run(self):
         while True:
+            print("Reading data from Arduino")
             # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
             data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
             if data:

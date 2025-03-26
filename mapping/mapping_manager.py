@@ -1,6 +1,6 @@
 from sessions import SessionManagerProtocol
 from config import ConfigManagerProtocol
-from mapping import MappingManagerProtocol
+from .mapping_protocol import MappingManagerProtocol
 from sessions import Session, SessionGroup
 
 

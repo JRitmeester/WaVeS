@@ -1,9 +1,7 @@
 from pathlib import Path
 import re
 from serial.tools import list_ports
-from config.config_protocol import ConfigManagerProtocol
-from PyQt5.QtWidgets import QMessageBox
-import webbrowser
+from .config_protocol import ConfigManagerProtocol
 
 
 class ConfigManager(ConfigManagerProtocol):
