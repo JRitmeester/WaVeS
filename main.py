@@ -11,10 +11,12 @@ from sessions.session_manager import SessionManager
 from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
 
+
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
     print("\nClosing application...")
     QtWidgets.QApplication.quit()
+
 
 def setup_gui(
     w: QtWidgets.QWidget,
@@ -29,13 +31,14 @@ def setup_gui(
     tray_icon.start_app()
     return tray_icon
 
+
 def main():
     # Set up signal handling for Ctrl+C
     signal.signal(signal.SIGINT, signal_handler)
 
     # Set up the application before the timer, because it requires a QThread instance.
     app = QtWidgets.QApplication(sys.argv)
-    
+
     # Enable processing of keyboard interrupts in the Qt event loop
     timer = QtCore.QTimer()
     timer.start(500)  # Time in ms
@@ -63,16 +66,20 @@ def main():
 
     session_manager = SessionManager()
     mapping_manager = MappingManager()
+    volume_thread = VolumeThread(
+        config_manager=config_manager,
+        session_manager=session_manager,
+        mapping_manager=mapping_manager,
+    )
+    # Create a widet to persist the tray icon. Not assigning it to a variable won't crash the app,
+    # but it won't show the icon in the system tray.
+    widget = QtWidgets.QWidget()
 
     # Create tray icon variable to persist volume thread. Not assigning it to a variable
     # will cause it to be garbage collected.
     tray_icon = setup_gui(
-        QtWidgets.QWidget(),
-        VolumeThread(
-            config_manager=config_manager,
-            session_manager=session_manager,
-            mapping_manager=mapping_manager,
-        ),
+        widget,
+        volume_thread,
     )
 
     sys.exit(app.exec_())
