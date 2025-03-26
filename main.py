@@ -4,7 +4,7 @@ import webbrowser
 import signal
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QMessageBox
-import utils
+import utils.utils as utils
 from core.tray_icon import SystemTrayIcon
 from config.config_manager import ConfigManager
 from sessions.session_manager import SessionManager

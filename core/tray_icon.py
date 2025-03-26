@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-import utils
+import utils.utils as utils
 from core.volume_thread import VolumeThread
 import webbrowser
 
