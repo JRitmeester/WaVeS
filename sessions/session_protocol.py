@@ -3,7 +3,6 @@ from sessions.sessions import Session
 
 
 class SessionManagerProtocol(Protocol):
-    """Define the interface we expect from SessionManager"""
 
     software_sessions: dict[str, Session]
     mapped_sessions: dict[str, bool]

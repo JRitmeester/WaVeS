@@ -1,11 +1,3 @@
-"""
-Volume control thread module for WaVeS application.
-
-Handles the continuous communication between the Arduino hardware and
-the Windows audio system. Reads volume values from the serial connection
-and applies them to the appropriate audio sessions.
-"""
-
 import sys
 import serial
 from PyQt5.QtCore import QThread
@@ -16,12 +8,6 @@ from mapping import MappingManagerProtocol
 
 
 class VolumeThread(QThread):
-    """
-    Thread handling communication with Arduino volume sliders.
-
-    Maintains a serial connection to the Arduino device and continuously
-    reads volume values to update Windows audio sessions.
-    """
 
     def __init__(
         self,
@@ -29,17 +15,7 @@ class VolumeThread(QThread):
         session_manager: SessionManagerProtocol,
         mapping_manager: MappingManagerProtocol,
     ):
-        """
-        Initialize volume control thread.
 
-        Args:
-            config_manager: Configuration management instance
-            session_manager: Session management instance
-            mapping_manager: Mapping management instance
-
-        Raises:
-            serial.SerialException: If serial connection cannot be established
-        """
         super().__init__()
 
         self.config_manager = config_manager
@@ -72,7 +48,6 @@ class VolumeThread(QThread):
 
     def run(self):
         while True:
-            print("Reading data from Arduino")
             # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
             data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
             if data:

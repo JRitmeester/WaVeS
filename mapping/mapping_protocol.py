@@ -5,7 +5,6 @@ from config.config_protocol import ConfigManagerProtocol
 
 
 class MappingManagerProtocol(Protocol):
-    """Define the interface we expect from MappingManager"""
 
     def get_mapping(
         self,

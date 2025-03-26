@@ -16,17 +16,6 @@ import webbrowser
 
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
-    """
-    System tray icon implementation with volume control functionality.
-
-    Provides user interface elements in the system tray, including context menu
-    options and error reporting capabilities.
-
-    Attributes:
-        icon: The icon displayed in the system tray
-        err_box: Error message dialog box
-        volume_thread (VolumeThread): Thread handling volume control operations
-    """
 
     def __init__(self, icon, volume_thread: VolumeThread, parent=None):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
@@ -55,16 +44,11 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         self.activated.connect(self.on_click)
 
     def std_err_post(self, msg):
-        """
-        This method receives stderr text strings as a pyqtSlot.
-        """
         if self.err_box is None:
             self.err_box = QMessageBox()
             # Both OK and window delete fire the 'finished' signal
             self.err_box.finished.connect(lambda: self.err_box.setText(""))
 
-        # A single error is sent as a string of separate stderr .write() messages,
-        # so concatenate them.
         self.err_box.setWindowTitle("Runtime Error")
         self.err_box.setIcon(QMessageBox.Critical)
         self.err_box.setText(self.err_box.text() + msg)
@@ -88,5 +72,4 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         sys.exit(0)
 
     def start_app(self):
-        """Start the volume control thread"""
         self.volume_thread.start()

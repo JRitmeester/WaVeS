@@ -13,7 +13,7 @@ class MappingManager(MappingManagerProtocol):
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, Session]:
-        """Update session mappings"""
+
         config_manager.load_config()
         return self.create_mappings(session_manager, config_manager)
 
@@ -22,14 +22,6 @@ class MappingManager(MappingManagerProtocol):
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, Session]:
-        """
-        Create mappings between sliders and sessions
-
-        Args:
-            session_manager: Provider of session information
-            config_manager: Provider of configuration information
-            target_indices: Dictionary mapping targets to slider indices
-        """
 
         target_indices = self.get_target_indices(config_manager)
 
@@ -58,7 +50,6 @@ class MappingManager(MappingManagerProtocol):
     def get_target_indices(
         self, config_manager: ConfigManagerProtocol
     ) -> dict[str, int]:
-        """Get mapping of targets to slider indices from config"""
         target_indices = {}
         for idx in range(int(config_manager.get_setting("sliders"))):
             application_str = config_manager.get_setting(str(idx))
@@ -76,7 +67,6 @@ class MappingManager(MappingManagerProtocol):
         session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
-        """Handle mapping for a single target"""
         if target == "master":
             session_dict[idx] = session_manager.master_session
         elif target == "system":
@@ -93,7 +83,6 @@ class MappingManager(MappingManagerProtocol):
         session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
-        """Add mapping for a software session"""
         if target in session_manager.software_sessions:
             session = session_manager.software_sessions.get(target)
             if session is not None:
@@ -107,7 +96,6 @@ class MappingManager(MappingManagerProtocol):
         session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
-        """Handle mapping for a group of targets"""
         active_sessions = []
 
         for target_app in target_group:
@@ -134,7 +122,6 @@ class MappingManager(MappingManagerProtocol):
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> None:
-        """Handle mapping for unmapped sessions"""
         unmapped_sessions = [
             s
             for s in session_manager.software_sessions.values()

@@ -36,15 +36,6 @@ class Session(ABC):
 
 
 class SoftwareSession(Session):
-    """
-    Base class for managing individual audio sessions.
-
-    Attributes:
-        idx (int): Index for mapping to physical slider
-        session (AudioSession): pycaw audio session object
-        name (str): Process name of the audio session
-        volume (SimpleAudioVolume): Volume control interface
-    """
 
     def __init__(self, session: AudioSession):
         self.session = session
@@ -65,15 +56,6 @@ class SoftwareSession(Session):
 
 
 class SessionGroup:
-    """
-    Groups multiple audio sessions for collective volume control.
-
-    Useful for controlling volume of multiple instances of the same application
-    or related audio sessions together.
-
-    Attributes:
-        sessions (List[Session]): List of audio sessions in this group
-    """
 
     def __init__(self, sessions: List[Session]):
         self.sessions = sessions
@@ -94,12 +76,6 @@ class SessionGroup:
 
 
 class MasterSession(Session):
-    """
-    Controls the system master volume.
-
-    Provides interface to control the overall system volume level
-    using the Windows audio endpoint volume interface.
-    """
 
     def __init__(self):
         # Pycaw code to get the master volume interface
@@ -122,12 +98,6 @@ class MasterSession(Session):
 
 
 class SystemSession(SoftwareSession):
-    """
-    Controls system sound effects volume.
-
-    Manages volume for Windows system sounds like notifications,
-    alerts, and other system audio events.
-    """
 
     def __init__(self):
         available_pycaw_sessions = AudioUtilities.GetAllSessions()
@@ -162,15 +132,6 @@ class SystemSession(SoftwareSession):
 
 
 class Device(AudioDevice, Session):
-    """
-    Controls specific audio output devices.
-
-    Allows direct control of individual audio devices like speakers,
-    headphones, or other audio outputs.
-
-    Attributes:
-        device_name: The specific audio device being controlled
-    """
 
     def __init__(self, pycaw_device: AudioDevice):
         # Initialize AudioDevice with all the required fields from the source device
