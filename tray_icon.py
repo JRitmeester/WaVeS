@@ -86,8 +86,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         )
         # Update to use injected volume_thread
         self.volume_thread.sessions = self.volume_thread.mapping_manager.get_mapping(
-            self.volume_thread.session_manager,
-            self.volume_thread.config_manager
+            self.volume_thread.session_manager, self.volume_thread.config_manager
         )
 
     def exit(self):

@@ -27,27 +27,12 @@ from volume_thread import VolumeThread
 
 logger = utils.get_logger()
 
-
-def get_icon_path():
-    if getattr(sys, "frozen", False):
-        # Running in a PyInstaller bundle
-        base_path = Path(sys._MEIPASS)
-        icon_dir = base_path / "icon.ico"
-    else:
-        icon_dir = Path.cwd() / "resources" / "icon.ico"
-
-    if not icon_dir.is_file():
-        raise FileNotFoundError("Icon not found")
-
-    return icon_dir
-
-
 def setup_gui(
     w: QtWidgets.QWidget,
     volume_thread: VolumeThread,
 ):
     tray_icon = SystemTrayIcon(
-        icon=QtGui.QIcon(get_icon_path().as_posix()),
+        icon=QtGui.QIcon(utils.get_icon_path().as_posix()),
         parent=w,
         volume_thread=volume_thread,
     )
@@ -59,7 +44,6 @@ def setup_gui(
 def main():
     app = QtWidgets.QApplication(sys.argv)
 
-    # Create configuration manager
     config_path = Path.home() / "AppData/Roaming/WaVeS"
     config_manager = ConfigManager(
         config_path, Path.cwd() / "resources" / "default_mapping.txt"
@@ -80,11 +64,12 @@ def main():
         )
         webbrowser.open(config_path)
 
-    # Create other managers
     session_manager = SessionManager()
     mapping_manager = MappingManager()
 
-    setup_gui(
+    # Create tray icon variable to persist volume thread. Not assigning it to a variable
+    # will cause it to be garbage collected.
+    tray_icon = setup_gui(
         QtWidgets.QWidget(),
         VolumeThread(
             config_manager=config_manager,

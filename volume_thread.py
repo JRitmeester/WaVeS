@@ -31,7 +31,7 @@ class VolumeThread(QThread):
         self,
         config_manager: ConfigManagerProtocol,
         session_manager: SessionManagerProtocol,
-        mapping_manager: MappingManagerProtocol
+        mapping_manager: MappingManagerProtocol,
     ):
         """
         Initialize volume control thread.
@@ -45,7 +45,7 @@ class VolumeThread(QThread):
             serial.SerialException: If serial connection cannot be established
         """
         super().__init__()
-        
+
         self.config_manager = config_manager
         self.session_manager = session_manager
         self.mapping_manager = mapping_manager
@@ -54,8 +54,7 @@ class VolumeThread(QThread):
         baudrate = self.config_manager.get_setting("baudrate")
         self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
         self.sessions = self.mapping_manager.get_mapping(
-            self.session_manager, 
-            self.config_manager
+            self.session_manager, self.config_manager
         )
 
         try:

@@ -1,5 +1,7 @@
 from typing import Protocol
 from pathlib import Path
+
+
 class ConfigManagerProtocol(Protocol):
     """Define the interface we expect from ConfigManager"""
 
