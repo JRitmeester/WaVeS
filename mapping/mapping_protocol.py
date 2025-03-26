@@ -1,7 +1,6 @@
 from typing import Protocol
-from sessions import Session
-from .session_protocol import SessionManagerProtocol
-from .config_protocol import ConfigManagerProtocol
+from sessions import Session, SessionManagerProtocol
+from config import ConfigManagerProtocol
 
 
 class MappingManagerProtocol(Protocol):

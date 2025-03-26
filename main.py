@@ -20,9 +20,9 @@ from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from tray_icon import SystemTrayIcon
-from config_manager import ConfigManager
-from session_manager import SessionManager
-from mapping_manager import MappingManager
+from config import ConfigManager
+from sessions import SessionManager
+from mapping import MappingManager
 from volume_thread import VolumeThread
 
 logger = utils.get_logger()

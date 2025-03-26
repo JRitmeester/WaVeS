@@ -1,6 +1,6 @@
-from protocols.session_protocol import SessionManagerProtocol
-from protocols.config_protocol import ConfigManagerProtocol
-from protocols.mapping_protocol import MappingManagerProtocol
+from sessions import SessionManagerProtocol
+from config import ConfigManagerProtocol
+from mapping import MappingManagerProtocol
 from sessions import Session, SessionGroup
 
 

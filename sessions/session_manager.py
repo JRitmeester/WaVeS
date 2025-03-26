@@ -8,7 +8,7 @@ from sessions import (
 )
 from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
 from pycaw.constants import AudioDeviceState
-from protocols.session_protocol import SessionManagerProtocol
+from sessions import SessionManagerProtocol
 
 
 class SessionManager(SessionManagerProtocol):
