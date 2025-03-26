@@ -21,7 +21,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
         self.icon = icon
         self.volume_thread = volume_thread  # Injected dependency
-        self.setToolTip("Windows Volume Slider Manager")
+        self.setToolTip("WaVeS")
 
         # Setup the error window
         self.err_box = None
