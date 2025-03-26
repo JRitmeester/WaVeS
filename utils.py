@@ -13,13 +13,11 @@ Functions:
     save_mapping_dir: Save mapping directory to configuration
     get_devices: List all available audio devices
     get_appdata_path: Get application data directory
-    get_logger: Get application logger instance
 """
 
 import yaml
 from pycaw.pycaw import AudioUtilities
 from pathlib import Path
-import logging
 import re
 import sys
 
@@ -74,13 +72,8 @@ def get_devices():
         re.sub("AudioDevice: ", "", str(x)) for x in AudioUtilities.GetAllDevices() if x
     ]
 
-
 def get_appdata_path():
     return Path.home() / "AppData/Roaming/WaVeS"
-
-
-def get_logger():
-    return logging.getLogger("root")
 
 
 def get_icon_path():

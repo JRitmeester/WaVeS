@@ -1,18 +1,3 @@
-"""
-WaVeS (Windows Volume Slider) - A PyQt5-based application for controlling Windows audio volumes using Arduino sliders.
-
-This module serves as the main entry point for the WaVeS application. It initializes the system tray interface,
-sets up logging, and handles application configuration. The application allows users to control various audio
-channels (master, system, and individual applications) using physical Arduino-based sliders.
-
-Key Features:
-- System tray integration for easy access
-- Configurable audio channel mapping
-- Arduino-based volume control integration
-- Logging system for debugging
-- Error handling and reporting
-"""
-
 import sys
 from pathlib import Path
 import webbrowser
@@ -24,8 +9,6 @@ from config.config_manager import ConfigManager
 from sessions.session_manager import SessionManager
 from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
-
-logger = utils.get_logger()
 
 
 def setup_gui(

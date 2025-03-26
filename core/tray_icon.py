@@ -12,10 +12,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from core.volume_thread import VolumeThread
-import logging
 import webbrowser
-
-logger = logging.getLogger("root")
 
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
@@ -88,10 +85,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         self.volume_thread.reload_mapping()
 
     def exit(self):
-        logger.info("Quitting application.")
         sys.exit(0)
 
     def start_app(self):
         """Start the volume control thread"""
-        logger.info("Starting application.")
         self.volume_thread.start()
