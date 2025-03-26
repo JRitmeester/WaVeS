@@ -63,5 +63,5 @@ class VolumeThread(QThread):
 
     def stop(self):
         self.running = False
-        if hasattr(self, 'arduino'):
+        if hasattr(self, "arduino"):
             self.arduino.close()
