@@ -1,4 +1,4 @@
-from typing import Dict, Any, Protocol, Tuple
+from typing import Protocol
 from sessions import Session, SessionGroup
 
 
@@ -10,9 +10,9 @@ class SessionManagerProtocol(Protocol):
     @property
     def system_session(self) -> Session: ...
     @property
-    def software_sessions(self) -> Dict[str, Session]: ...
+    def software_sessions(self) -> dict[str, Session]: ...
     @property
-    def mapped_sessions(self) -> Dict[str, bool]: ...
+    def mapped_sessions(self) -> dict[str, bool]: ...
     def get_device_session(self, device_name: str) -> Session: ...
 
 
@@ -31,7 +31,7 @@ class MappingManager:
         self,
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
-    ) -> Dict[int, Session]:
+    ) -> dict[int, Session]:
         """Update session mappings"""
         config_manager.load_config()
         return self.create_mappings(session_manager, config_manager)
@@ -40,7 +40,7 @@ class MappingManager:
         self,
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
-    ) -> Dict[int, Session]:
+    ) -> dict[int, Session]:
         """
         Create mappings between sliders and sessions
 
@@ -76,7 +76,7 @@ class MappingManager:
 
     def get_target_indices(
         self, config_manager: ConfigManagerProtocol
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Get mapping of targets to slider indices from config"""
         target_indices = {}
         for idx in range(int(config_manager.get_setting("sliders"))):
@@ -92,7 +92,7 @@ class MappingManager:
         self,
         target: str,
         idx: int,
-        session_dict: Dict[int, Session],
+        session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
         """Handle mapping for a single target"""
@@ -109,7 +109,7 @@ class MappingManager:
         self,
         target: str,
         idx: int,
-        session_dict: Dict[int, Session],
+        session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
         """Add mapping for a software session"""
@@ -121,9 +121,9 @@ class MappingManager:
 
     def _add_group_mapping(
         self,
-        target_group: Tuple[str, ...],
+        target_group: tuple[str, ...],
         idx: int,
-        session_dict: Dict[int, Session],
+        session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
         """Handle mapping for a group of targets"""
@@ -149,7 +149,7 @@ class MappingManager:
     def _add_unmapped_sessions(
         self,
         idx: int,
-        session_dict: Dict[int, Session],
+        session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> None:

@@ -20,7 +20,7 @@ import traceback
 import types
 from pathlib import Path
 import webbrowser
-from typing import Optional, NoReturn, Callable
+from typing import Optional
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QObject

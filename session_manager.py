@@ -1,13 +1,11 @@
 from sessions import (
-    SessionGroup,
     MasterSession,
     Session,
     SystemSession,
     Device,
     SoftwareSession,
 )
-from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
-from pycaw.constants import AudioDeviceState
+from pycaw.pycaw import AudioUtilities, AudioDeviceState
 
 
 class SessionManager:
