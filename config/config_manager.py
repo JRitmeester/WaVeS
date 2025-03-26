@@ -18,22 +18,10 @@ class ConfigManager(ConfigManagerProtocol):
             self.config_file_path.write_text(self.default_mapping_path.read_text())
 
     def load_config(self) -> None:
-        """Load configuration file contents"""
         self.lines = self.config_file_path.read_text().split("\n")
 
     def get_setting(self, text: str) -> str:
-        """
-        Extract a specific setting from the configuration file.
 
-        Args:
-            text (str): The setting name to search for
-
-        Returns:
-            str: The value of the requested setting
-
-        Raises:
-            ValueError: If the setting is not found
-        """
         matching_settings = list(filter(lambda x: text + ":" in x, self.lines))
         if len(matching_settings) == 0:
             raise ValueError(f"Setting {text} is not found in the configuration file.")
@@ -44,7 +32,6 @@ class ConfigManager(ConfigManagerProtocol):
         return value.group(1)
 
     def get_serial_port(self) -> str:
-        """Get the appropriate serial port based on config settings"""
         ports = list_ports.comports()
         device_name = self.get_setting("device name")
 
@@ -61,5 +48,4 @@ class ConfigManager(ConfigManagerProtocol):
 
     @staticmethod
     def get_default_config_path() -> Path:
-        """Returns default configuration directory path"""
         return Path.home() / "AppData/Roaming"
