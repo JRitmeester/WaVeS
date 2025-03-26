@@ -17,24 +17,23 @@ from pycaw.api.mmdeviceapi import IMMDeviceEnumerator
 from pycaw.constants import CLSID_MMDeviceEnumerator
 
 
-
 class MyAudioUtilities(AudioUtilities):
     """
     Extended audio utilities with device-specific controls.
-    
+
     Extends pycaw's AudioUtilities class to add functionality for
     getting specific audio devices by their ID.
     """
-    
+
     @staticmethod
     def GetSpeaker(id_=None):
         """
         Get speaker device by ID or default speaker.
-        
+
         Args:
             id_ (str, optional): Device ID to retrieve. If None, returns
                                default audio endpoint.
-        
+
         Returns:
             Speaker device interface
         """
@@ -44,5 +43,7 @@ class MyAudioUtilities(AudioUtilities):
         if id_ is not None:
             speakers = device_enumerator.GetDevice(id_)
         else:
-            speakers = device_enumerator.GetDefaultAudioEndpoint(EDataFlow.eRender.value, ERole.eMultimedia.value)
+            speakers = device_enumerator.GetDefaultAudioEndpoint(
+                EDataFlow.eRender.value, ERole.eMultimedia.value
+            )
         return speakers

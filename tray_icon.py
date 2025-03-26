@@ -21,15 +21,16 @@ logger = logging.getLogger("root")
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     """
     System tray icon implementation with volume control functionality.
-    
+
     Provides user interface elements in the system tray, including context menu
     options and error reporting capabilities.
-    
+
     Attributes:
         icon: The icon displayed in the system tray
         err_box: Error message dialog box
         thread (VolumeThread): Thread handling volume control operations
     """
+
     def __init__(self, icon, parent=None):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
         self.icon = icon
@@ -45,7 +46,9 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         reload_.triggered.connect(self.reload)
 
         open_config = menu.addAction("Open configuration file")
-        open_config.triggered.connect(lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt"))
+        open_config.triggered.connect(
+            lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt")
+        )
 
         exit_ = menu.addAction("Exit")
         exit_.triggered.connect(self.exit)
@@ -62,7 +65,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
             self.err_box = QMessageBox()
             # Both OK and window delete fire the 'finished' signal
             self.err_box.finished.connect(lambda: self.err_box.setText(""))
-            
+
         # A single error is sent as a string of separate stderr .write() messages,
         # so concatenate them.
         self.err_box.setWindowTitle("Runtime Error")
@@ -78,7 +81,9 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
             self.reload()
 
     def reload(self):
-        self.showMessage("Volume Slider Manager", "Reloading slider mappings...", self.icon)
+        self.showMessage(
+            "Volume Slider Manager", "Reloading slider mappings...", self.icon
+        )
         self.thread.control.get_mapping()
 
     def exit(self):

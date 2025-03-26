@@ -56,9 +56,7 @@ class VolumeThread(QThread):
         )
 
         try:
-            self.arduino = serial.Serial(
-                port, baudrate, timeout=0.1
-            )
+            self.arduino = serial.Serial(port, baudrate, timeout=0.1)
         except serial.SerialException:
             QMessageBox.critical(
                 None,
@@ -77,7 +75,7 @@ class VolumeThread(QThread):
                 values = [float(val) for val in data.split("|")]
                 if len(values) != int(self.config_manager.get_setting("sliders")):
                     return
-                
+
                 for index, app in self.sessions.items():
                     volume = values[index] / 1023
                     if self.inverted:

@@ -1,6 +1,14 @@
-from sessions import SessionGroup, MasterSession, Session, SystemSession, Device, SoftwareSession
+from sessions import (
+    SessionGroup,
+    MasterSession,
+    Session,
+    SystemSession,
+    Device,
+    SoftwareSession,
+)
 from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
 from pycaw.constants import AudioDeviceState
+
 
 class SessionManager:
 
@@ -17,7 +25,6 @@ class SessionManager:
         }
         self.reload_sessions_and_devices()
 
-
     @property
     def system_session(self) -> SystemSession:
         return self._system_session
@@ -33,7 +40,9 @@ class SessionManager:
         self.create_device_sessions()
 
     def create_software_sessions(self):
-        pycaw_software_sessions = filter(lambda x: x.Process is not None, self.all_pycaw_sessions)  # Filter out system sounds
+        pycaw_software_sessions = filter(
+            lambda x: x.Process is not None, self.all_pycaw_sessions
+        )  # Filter out system sounds
         for pycaw_session in pycaw_software_sessions:
             session = SoftwareSession(pycaw_session)
             self.mapped_sessions[session.name] = False
@@ -48,7 +57,10 @@ class SessionManager:
     def create_device_sessions(self):
         for pycaw_device in self.all_pycaw_devices:
             # try:
-            if pycaw_device.FriendlyName == None or pycaw_device.state == AudioDeviceState.NotPresent:
+            if (
+                pycaw_device.FriendlyName == None
+                or pycaw_device.state == AudioDeviceState.NotPresent
+            ):
                 continue
             device = Device(pycaw_device)
             self.mapped_sessions[device.name] = False
