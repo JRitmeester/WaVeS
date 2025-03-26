@@ -2,6 +2,9 @@ from pathlib import Path
 import re
 from serial.tools import list_ports
 from protocols.config_protocol import ConfigManagerProtocol
+from PyQt5.QtWidgets import QMessageBox
+import webbrowser
+
 
 class ConfigManager(ConfigManagerProtocol):
     def __init__(self, config_path: Path, default_mapping_path: Path):
@@ -12,10 +15,9 @@ class ConfigManager(ConfigManagerProtocol):
         self.load_config()
 
     def ensure_config_exists(self) -> Path:
-        self.config_path.mkdir(exist_ok=True)
-        self.config_file_path.touch(exist_ok=True)
-        self.config_file_path.write_text(self.default_mapping_path.read_text())
-        return self.config_file_path
+        if not self.config_file_path.exists():
+            self.config_file_path.touch(exist_ok=True, parents=True)
+            self.config_file_path.write_text(self.default_mapping_path.read_text())
 
     def load_config(self) -> None:
         """Load configuration file contents"""

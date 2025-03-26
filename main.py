@@ -14,12 +14,9 @@ Key Features:
 """
 
 import sys
-import types
 from pathlib import Path
 import webbrowser
-
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from tray_icon import SystemTrayIcon
@@ -45,36 +42,10 @@ def get_icon_path():
     return icon_dir
 
 
-def main():
-    app = QtWidgets.QApplication(sys.argv)
-    w = QtWidgets.QWidget()
-
-    # Create configuration manager
-    config_path = Path.home() / "AppData/Roaming/WaVeS"
-    config_manager = ConfigManager(
-        config_path, Path.cwd() / "resources" / "default_mapping.txt"
-    )
-
-    # Ensure config exists
-    try:
-        config_manager.load_config()
-    except FileNotFoundError:
-        config_manager.ensure_config_exists()
-        show_config_created_dialog(config_path)
-        webbrowser.open(config_path)
-
-    # Create other managers
-    session_manager = SessionManager()
-    mapping_manager = MappingManager()
-
-    # Create volume thread with injected dependencies
-    volume_thread = VolumeThread(
-        config_manager=config_manager,
-        session_manager=session_manager,
-        mapping_manager=mapping_manager,
-    )
-
-    # Create and show tray icon
+def setup_gui(
+    w: QtWidgets.QWidget,
+    volume_thread: VolumeThread,
+):
     tray_icon = SystemTrayIcon(
         icon=QtGui.QIcon(get_icon_path().as_posix()),
         parent=w,
@@ -82,21 +53,47 @@ def main():
     )
     tray_icon.show()
     tray_icon.start_app()
+    return tray_icon
+
+
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+
+    # Create configuration manager
+    config_path = Path.home() / "AppData/Roaming/WaVeS"
+    config_manager = ConfigManager(
+        config_path, Path.cwd() / "resources" / "default_mapping.txt"
+    )
+
+    try:
+        config_manager.load_config()
+    except FileNotFoundError:
+        config_manager.ensure_config_exists()
+        QMessageBox.information(
+            None,
+            "New config file created",
+            f"""A new config file was created for you in the same directory as the app:
+            
+            {config_path.as_posix()}
+            
+            It will now be opened for you to view the settings.""",
+        )
+        webbrowser.open(config_path)
+
+    # Create other managers
+    session_manager = SessionManager()
+    mapping_manager = MappingManager()
+
+    setup_gui(
+        QtWidgets.QWidget(),
+        VolumeThread(
+            config_manager=config_manager,
+            session_manager=session_manager,
+            mapping_manager=mapping_manager,
+        ),
+    )
 
     sys.exit(app.exec_())
-
-
-def show_config_created_dialog(config_path: Path) -> None:
-    QMessageBox.information(
-        None,
-        "New config file created",
-        f"""A new config file was created for you in the same directory as the app:
-        
-        {str(config_path)}
-        
-        It will now be opened for you to view the settings.""",
-    )
-    webbrowser.open(config_path)
 
 
 if __name__ == "__main__":
