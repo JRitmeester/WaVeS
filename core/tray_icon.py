@@ -1,12 +1,3 @@
-"""
-System tray interface module for WaVeS application.
-
-Provides a system tray icon with context menu for controlling the application,
-including options to reload mappings, view devices, and access configuration.
-The module handles user interaction through the system tray and manages
-the volume control thread.
-"""
-
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
