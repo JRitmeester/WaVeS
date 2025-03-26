@@ -20,7 +20,6 @@ import traceback
 import types
 from pathlib import Path
 import webbrowser
-from typing import Optional, NoReturn, Callable
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QObject
@@ -53,7 +52,7 @@ class StdErrHandler(QObject):
 
     err_msg = pyqtSignal(str)
 
-    def __init__(self, parent: Optional[QObject] = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         QObject.__init__(self)
 
     def write(self, msg: str) -> None:

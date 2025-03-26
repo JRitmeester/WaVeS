@@ -8,7 +8,6 @@ and applies them to the appropriate audio sessions.
 
 import sys
 import serial
-from control import Control
 from config_manager import ConfigManager
 from mapping_manager import MappingManager
 from session_manager import SessionManager

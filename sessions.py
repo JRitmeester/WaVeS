@@ -5,7 +5,6 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession, AudioDevice
 from abc import ABC, abstractmethod
 from _ctypes import COMError
-import utils
 from MyAudioUtilities import MyAudioUtilities
 import warnings
 

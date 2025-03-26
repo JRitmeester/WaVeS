@@ -1,13 +1,12 @@
 from pathlib import Path
 import re
-from typing import List, Protocol
 from serial.tools import list_ports
 
 
 class ConfigManager:
     def __init__(self, mapping_dir: Path):
         self.mapping_dir = mapping_dir
-        self.lines: List[str] = []
+        self.lines: list[str] = []
         self.load_config()
 
     def load_config(self) -> None:
