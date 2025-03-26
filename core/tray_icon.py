@@ -21,7 +21,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         menu = QtWidgets.QMenu(parent)
 
         reload_ = menu.addAction("Reload mapping")
-        reload_.triggered.connect(self.reload)
+        reload_.triggered.connect(self.volume_thread.reload_mapping)
 
         open_config = menu.addAction("Open configuration file")
         open_config.triggered.connect(
@@ -55,6 +55,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
             self.volume_thread.reload_mapping()
 
     def exit(self):
+        self.volume_thread.stop()
+        self.volume_thread.wait()
         sys.exit(0)
 
     def start_app(self):
