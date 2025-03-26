@@ -88,9 +88,10 @@ def initialise(path: Path) -> None:
     Creates the configuration directory and a default mapping.txt file with
     example configurations for audio channel mapping.
     """
-    path.mkdir()
+
+    path.mkdir(exist_ok=True)
     mapping_file: Path = path / "mapping.txt"
-    mapping_file.touch()
+    mapping_file.touch(exist_ok=True)
     mapping_file.write_text(default_mapping_txt)
     QMessageBox.information(
         None,
@@ -117,40 +118,9 @@ def get_icon_path():
 
 if __name__ == "__main__":
     appdata_path: Path = utils.get_appdata_path()
-
     if not appdata_path.exists():
         initialise(appdata_path)
 
-    ## LOGGER STUFF
-    # Create the logs directory if it doesn't exist yet.
-    log_path: Path = appdata_path / "logs"
-    if not log_path.is_dir():
-        log_path.mkdir(parents=True)
-
-    # Delete all the logs except for the 5 most recent ones.
-    all_logs: list[Path] = list(filter(Path.is_file, log_path.glob("**/*")))
-    most_recent_logs: list[Path] = sorted(
-        all_logs, key=lambda x: x.stat().st_ctime, reverse=True
-    )[:5]
-    logs_to_delete: list[Path] = [
-        log for log in all_logs if log not in most_recent_logs
-    ]
-    for log in logs_to_delete:
-        log.unlink()
-
-    # Setup the logger
-    logger: logging.Logger = utils.get_logger()
-    logger.setLevel(logging.DEBUG)
-
-    # Create the logger file handler to write the logs to file.
-    handler: logging.FileHandler = logging.FileHandler(
-        log_path / f'WVSM-{datetime.datetime.now().strftime("%d%m%y-%H%M%S")}.log'
-    )
-    handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
-    logger.addHandler(handler)
-
-    logger.info("=" * 50)
-    logger.info("Running WaVeS...")
 
     ## ERROR STUFF
     old_excepthook = sys.excepthook
