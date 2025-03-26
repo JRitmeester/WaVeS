@@ -32,6 +32,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         exit_.triggered.connect(self.exit)
 
         self.setContextMenu(menu)
+
+        # When the tray icon is clicked, reload the mapping.
         self.activated.connect(self.on_click)
 
     def std_err_post(self, msg):
@@ -50,14 +52,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
     def on_click(self, reason):
         if reason == self.Trigger:  # LMB
-            self.reload()
-
-    def reload(self):
-        self.showMessage(
-            "Volume Slider Manager", "Reloading slider mappings...", self.icon
-        )
-
-        self.volume_thread.reload_mapping()
+            self.volume_thread.reload_mapping()
 
     def exit(self):
         sys.exit(0)
