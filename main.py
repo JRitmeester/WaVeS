@@ -19,11 +19,11 @@ import webbrowser
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox
 import utils
-from tray_icon import SystemTrayIcon
-from config import ConfigManager
-from sessions import SessionManager
-from mapping import MappingManager
-from volume_thread import VolumeThread
+from core.tray_icon import SystemTrayIcon
+from config.config_manager import ConfigManager
+from sessions.session_manager import SessionManager
+from mapping.mapping_manager import MappingManager
+from core.volume_thread import VolumeThread
 
 logger = utils.get_logger()
 

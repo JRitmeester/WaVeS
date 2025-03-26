@@ -11,7 +11,7 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import utils
-from volume_thread import VolumeThread
+from core.volume_thread import VolumeThread
 import logging
 import webbrowser
 

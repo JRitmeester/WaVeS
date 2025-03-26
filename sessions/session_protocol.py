@@ -1,5 +1,5 @@
 from typing import Protocol
-from .sessions import Session
+from sessions.sessions import Session
 
 
 class SessionManagerProtocol(Protocol):

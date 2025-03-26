@@ -1,7 +1,7 @@
-from sessions import SessionManagerProtocol
-from config import ConfigManagerProtocol
-from .mapping_protocol import MappingManagerProtocol
-from sessions import Session, SessionGroup
+from sessions.session_protocol import SessionManagerProtocol
+from config.config_protocol import ConfigManagerProtocol
+from mapping.mapping_protocol import MappingManagerProtocol
+from sessions.sessions import Session, SessionGroup
 
 
 class MappingManager(MappingManagerProtocol):
