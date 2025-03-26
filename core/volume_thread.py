@@ -2,9 +2,9 @@ import sys
 import serial
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
-from sessions import SessionManagerProtocol
-from config import ConfigManagerProtocol
-from mapping import MappingManagerProtocol
+from sessions.session_manager import SessionManagerProtocol
+from config.config_manager import ConfigManagerProtocol
+from mapping.mapping_manager import MappingManagerProtocol
 
 
 class VolumeThread(QThread):
@@ -18,6 +18,7 @@ class VolumeThread(QThread):
 
         super().__init__()
 
+        self.running = True
         self.config_manager = config_manager
         self.session_manager = session_manager
         self.mapping_manager = mapping_manager
@@ -47,7 +48,7 @@ class VolumeThread(QThread):
         )
 
     def run(self):
-        while True:
+        while self.running:
             # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
             data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
             if data:
@@ -59,3 +60,8 @@ class VolumeThread(QThread):
                     if self.inverted:
                         volume = 1 - volume
                     app.set_volume(volume)
+
+    def stop(self):
+        self.running = False
+        if hasattr(self, 'arduino'):
+            self.arduino.close()

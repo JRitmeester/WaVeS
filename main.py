@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 import webbrowser
-from PyQt5 import QtWidgets, QtGui
+import signal
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QMessageBox
 import utils
 from core.tray_icon import SystemTrayIcon
@@ -10,6 +11,10 @@ from sessions.session_manager import SessionManager
 from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
 
+def signal_handler(signum, frame):
+    """Handle Ctrl+C gracefully"""
+    print("\nClosing application...")
+    QtWidgets.QApplication.quit()
 
 def setup_gui(
     w: QtWidgets.QWidget,
@@ -24,9 +29,17 @@ def setup_gui(
     tray_icon.start_app()
     return tray_icon
 
-
 def main():
+    # Set up signal handling for Ctrl+C
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Set up the application before the timer, because it requires a QThread instance.
     app = QtWidgets.QApplication(sys.argv)
+    
+    # Enable processing of keyboard interrupts in the Qt event loop
+    timer = QtCore.QTimer()
+    timer.start(500)  # Time in ms
+    timer.timeout.connect(lambda: None)  # Let the interpreter run each 500 ms
 
     config_path = Path.home() / "AppData/Roaming/WaVeS"
     config_manager = ConfigManager(
