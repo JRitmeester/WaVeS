@@ -13,7 +13,6 @@ Key Features:
 - Error handling and reporting
 """
 
-
 import sys
 import types
 from pathlib import Path
@@ -30,45 +29,6 @@ from mapping_manager import MappingManager
 from volume_thread import VolumeThread
 
 logger = utils.get_logger()
-
-
-class StdErrHandler(QObject):
-    """
-    Custom stderr handler that redirects error messages to the GUI.
-
-    This class intercepts standard error messages and emits them as Qt signals,
-    allowing them to be displayed in the application's GUI interface.
-
-    Attributes:
-        err_msg (pyqtSignal): Signal emitted when an error message is received
-    """
-
-    err_msg = pyqtSignal(str)
-
-    def __init__(self, parent: QObject | None = None) -> None:
-        QObject.__init__(self)
-
-    def write(self, msg: str) -> None:
-        # stderr messages are sent to this method.
-        self.err_msg.emit(msg)
-
-    def flush(self) -> None:
-        pass
-
-
-def except_hook(
-    cls: type[BaseException], exception: BaseException, traceback: types.TracebackType
-) -> None:
-    """
-    Global exception handler that logs uncaught exceptions.
-
-    Args:
-        cls: Exception class
-        exception: Exception instance
-        traceback: Traceback object
-    """
-    logger.critical("Uncaught exception", exc_info=(cls, exception, traceback))
-    sys.excepthook(cls, exception, traceback)
 
 
 def get_icon_path():
@@ -91,7 +51,9 @@ def main():
 
     # Create configuration manager
     config_path = Path.home() / "AppData/Roaming/WaVeS"
-    config_manager = ConfigManager(config_path, Path.cwd() / "resources" / "default_mapping.txt")
+    config_manager = ConfigManager(
+        config_path, Path.cwd() / "resources" / "default_mapping.txt"
+    )
 
     # Ensure config exists
     try:
@@ -109,14 +71,14 @@ def main():
     volume_thread = VolumeThread(
         config_manager=config_manager,
         session_manager=session_manager,
-        mapping_manager=mapping_manager
+        mapping_manager=mapping_manager,
     )
 
     # Create and show tray icon
     tray_icon = SystemTrayIcon(
         icon=QtGui.QIcon(get_icon_path().as_posix()),
         parent=w,
-        volume_thread=volume_thread
+        volume_thread=volume_thread,
     )
     tray_icon.show()
     tray_icon.start_app()
@@ -132,9 +94,10 @@ def show_config_created_dialog(config_path: Path) -> None:
         
         {str(config_path)}
         
-        It will now be opened for you to view the settings."""
+        It will now be opened for you to view the settings.""",
     )
     webbrowser.open(config_path)
+
 
 if __name__ == "__main__":
     main()
