@@ -28,12 +28,13 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     Attributes:
         icon: The icon displayed in the system tray
         err_box: Error message dialog box
-        thread (VolumeThread): Thread handling volume control operations
+        volume_thread (VolumeThread): Thread handling volume control operations
     """
 
-    def __init__(self, icon, parent=None):
+    def __init__(self, icon, volume_thread: VolumeThread, parent=None):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
         self.icon = icon
+        self.volume_thread = volume_thread  # Injected dependency
         self.setToolTip("Windows Volume Slider Manager")
 
         # Setup the error window
@@ -55,7 +56,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         self.setContextMenu(menu)
         self.activated.connect(self.on_click)
-        self.thread = VolumeThread()
 
     def std_err_post(self, msg):
         """
@@ -84,17 +84,17 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         self.showMessage(
             "Volume Slider Manager", "Reloading slider mappings...", self.icon
         )
-        self.thread.control.get_mapping()
+        # Update to use injected volume_thread
+        self.volume_thread.sessions = self.volume_thread.mapping_manager.get_mapping(
+            self.volume_thread.session_manager,
+            self.volume_thread.config_manager
+        )
 
     def exit(self):
         logger.info("Quitting application.")
         sys.exit(0)
 
     def start_app(self):
-        """
-        Create a global volume control object "vc" and a systray object to control the system tray in other places.
-        Start the event loop to parse incoming data from the volume sliders. Stops the vc thread and systray thread once
-        :return:
-        """
+        """Start the volume control thread"""
         logger.info("Starting application.")
-        self.thread.start()
+        self.volume_thread.start()

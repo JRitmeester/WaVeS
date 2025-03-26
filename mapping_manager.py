@@ -1,29 +1,10 @@
-from typing import Protocol
+from protocols.session_protocol import SessionManagerProtocol
+from protocols.config_protocol import ConfigManagerProtocol
+from protocols.mapping_protocol import MappingManagerProtocol
 from sessions import Session, SessionGroup
 
 
-class SessionManagerProtocol(Protocol):
-    """Define the interface we expect from SessionManager"""
-
-    @property
-    def master_session(self) -> Session: ...
-    @property
-    def system_session(self) -> Session: ...
-    @property
-    def software_sessions(self) -> dict[str, Session]: ...
-    @property
-    def mapped_sessions(self) -> dict[str, bool]: ...
-    def get_device_session(self, device_name: str) -> Session: ...
-
-
-class ConfigManagerProtocol(Protocol):
-    """Define the interface we expect from ConfigManager"""
-
-    def get_setting(self, text: str) -> str: ...
-    def load_config(self) -> None: ...
-
-
-class MappingManager:
+class MappingManager(MappingManagerProtocol):
     def __init__(self):
         pass
 

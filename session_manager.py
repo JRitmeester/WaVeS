@@ -8,14 +8,15 @@ from sessions import (
 )
 from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
 from pycaw.constants import AudioDeviceState
+from protocols.session_protocol import SessionManagerProtocol
 
 
-class SessionManager:
+class SessionManager(SessionManagerProtocol):
 
     def __init__(self) -> None:
         self.all_pycaw_sessions = AudioUtilities.GetAllSessions()
         self.all_pycaw_devices = AudioUtilities.GetAllDevices()
-        self.software_sessions: dict[str, Session] = {}
+        self.software_sessions = {}
         self._master_session: MasterSession = MasterSession()
         self._system_session: SystemSession = SystemSession()
         self.devices: dict[str, Device] = {}

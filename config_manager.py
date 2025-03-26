@@ -1,17 +1,25 @@
 from pathlib import Path
 import re
 from serial.tools import list_ports
+from protocols.config_protocol import ConfigManagerProtocol
 
-
-class ConfigManager:
-    def __init__(self, mapping_dir: Path):
-        self.mapping_dir = mapping_dir
+class ConfigManager(ConfigManagerProtocol):
+    def __init__(self, config_path: Path, default_mapping_path: Path):
+        self.config_path = config_path
+        self.config_file_path = config_path / "mapping.txt"
+        self.default_mapping_path = default_mapping_path
         self.lines: list[str] = []
         self.load_config()
 
+    def ensure_config_exists(self) -> Path:
+        self.config_path.mkdir(exist_ok=True)
+        self.config_file_path.touch(exist_ok=True)
+        self.config_file_path.write_text(self.default_mapping_path.read_text())
+        return self.config_file_path
+
     def load_config(self) -> None:
         """Load configuration file contents"""
-        self.lines = self.mapping_dir.read_text().split("\n")
+        self.lines = self.config_file_path.read_text().split("\n")
 
     def get_setting(self, text: str) -> str:
         """

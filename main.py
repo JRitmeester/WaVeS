@@ -13,30 +13,23 @@ Key Features:
 - Error handling and reporting
 """
 
-import datetime
-import logging
+
 import sys
-import traceback
 import types
 from pathlib import Path
 import webbrowser
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QObject
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 import utils
 from tray_icon import SystemTrayIcon
+from config_manager import ConfigManager
+from session_manager import SessionManager
+from mapping_manager import MappingManager
+from volume_thread import VolumeThread
 
 logger = utils.get_logger()
-
-try:
-    default_mapping_txt = (Path.cwd() / "default_mapping.txt").read_text()
-except FileNotFoundError:
-    logger.error("default_mapping.txt not found")
-    default_mapping_txt = ""  # Or some default configuration
-except Exception as e:
-    logger.error(f"Error reading default_mapping.txt: {e}")
-    default_mapping_txt = ""
 
 
 class StdErrHandler(QObject):
@@ -78,30 +71,6 @@ def except_hook(
     sys.excepthook(cls, exception, traceback)
 
 
-def initialise(path: Path) -> None:
-    """
-    Initialize the application configuration directory and create default mapping file.
-
-    Args:
-        path (Path): Path where configuration files should be created
-
-    Creates the configuration directory and a default mapping.txt file with
-    example configurations for audio channel mapping.
-    """
-
-    path.mkdir(exist_ok=True)
-    mapping_file: Path = path / "mapping.txt"
-    mapping_file.touch(exist_ok=True)
-    mapping_file.write_text(default_mapping_txt)
-    QMessageBox.information(
-        None,
-        "New config file created",
-        f"""A new config file was created for you in the same directory as the app:\n\n{str(path)}.
-        It will now be opened for you to view the settings.""",
-    )
-    webbrowser.open(path)
-
-
 def get_icon_path():
     if getattr(sys, "frozen", False):
         # Running in a PyInstaller bundle
@@ -116,43 +85,56 @@ def get_icon_path():
     return icon_dir
 
 
-if __name__ == "__main__":
-    appdata_path: Path = utils.get_appdata_path()
-    if not appdata_path.exists():
-        initialise(appdata_path)
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    w = QtWidgets.QWidget()
 
+    # Create configuration manager
+    config_path = Path.home() / "AppData/Roaming/WaVeS"
+    config_manager = ConfigManager(config_path, Path.cwd() / "resources" / "default_mapping.txt")
 
-    ## ERROR STUFF
-    old_excepthook = sys.excepthook
-    sys.excepthook = except_hook
-
-    ## APP STUFF
-    app: QApplication = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
-    w: QtWidgets.QWidget = QtWidgets.QWidget()
-
-    icon: QtGui.QIcon = QtGui.QIcon(str(get_icon_path()))
-    tray_icon: SystemTrayIcon = SystemTrayIcon(icon, w)
-
-    # Create the stderr handler and point stderr to it
-    std_err_handler: StdErrHandler = StdErrHandler()
-    sys.stderr = std_err_handler
-
-    # Connect err_msg signal to message box method in main window
-    std_err_handler.err_msg.connect(tray_icon.std_err_post)
-
-    # Errors that occur in the init phase aren't caught by the stderr.
+    # Ensure config exists
     try:
-        tray_icon.show()
-        tray_icon.start_app()
-    except Exception as e:
-        QMessageBox.critical(
-            None,
-            "Error during start-up",
-            f"An error occurred during start-up:\n\n{traceback.format_exc()}",
-        )
-        logger.critical(
-            "Uncaught exception", exc_info=(type(e).__class__, e, e.__traceback__)
-        )
+        config_manager.load_config()
+    except FileNotFoundError:
+        config_manager.ensure_config_exists()
+        show_config_created_dialog(config_path)
+        webbrowser.open(config_path)
 
-    sys.exit(app.exec())
+    # Create other managers
+    session_manager = SessionManager()
+    mapping_manager = MappingManager()
+
+    # Create volume thread with injected dependencies
+    volume_thread = VolumeThread(
+        config_manager=config_manager,
+        session_manager=session_manager,
+        mapping_manager=mapping_manager
+    )
+
+    # Create and show tray icon
+    tray_icon = SystemTrayIcon(
+        icon=QtGui.QIcon(get_icon_path().as_posix()),
+        parent=w,
+        volume_thread=volume_thread
+    )
+    tray_icon.show()
+    tray_icon.start_app()
+
+    sys.exit(app.exec_())
+
+
+def show_config_created_dialog(config_path: Path) -> None:
+    QMessageBox.information(
+        None,
+        "New config file created",
+        f"""A new config file was created for you in the same directory as the app:
+        
+        {str(config_path)}
+        
+        It will now be opened for you to view the settings."""
+    )
+    webbrowser.open(config_path)
+
+if __name__ == "__main__":
+    main()
