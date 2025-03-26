@@ -10,6 +10,7 @@ from config.config_manager import ConfigManager
 from sessions.session_manager import SessionManager
 from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
+from microcontroller.microcontroller_manager import MicrocontrollerManager
 
 
 def signal_handler(signum, frame):
@@ -70,6 +71,7 @@ def main():
         config_manager=config_manager,
         session_manager=session_manager,
         mapping_manager=mapping_manager,
+        microcontroller_manager=MicrocontrollerManager(),
     )
     # Create a widet to persist the tray icon. Not assigning it to a variable won't crash the app,
     # but it won't show the icon in the system tray.

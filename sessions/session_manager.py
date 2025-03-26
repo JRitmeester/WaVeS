@@ -72,3 +72,13 @@ class SessionManager(SessionManagerProtocol):
         if device is None:
             raise ValueError(f"Device {device_name} not found.")
         return device
+
+    def apply_volumes(
+        self, values: list[float], mapping: dict[int, Session], inverted: bool
+    ) -> None:
+        """Apply volume values to the mapped sessions"""
+        for index, session in mapping.items():
+            volume = values[index]
+            if inverted:
+                volume = 1 - volume
+            session.set_volume(volume)

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QMessageBox
 from sessions.session_manager import SessionManagerProtocol
 from config.config_manager import ConfigManagerProtocol
 from mapping.mapping_manager import MappingManagerProtocol
+from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
 
 
 class VolumeThread(QThread):
@@ -14,6 +15,7 @@ class VolumeThread(QThread):
         config_manager: ConfigManagerProtocol,
         session_manager: SessionManagerProtocol,
         mapping_manager: MappingManagerProtocol,
+        microcontroller_manager: MicrocontrollerProtocol,
     ):
 
         super().__init__()
@@ -22,25 +24,18 @@ class VolumeThread(QThread):
         self.config_manager = config_manager
         self.session_manager = session_manager
         self.mapping_manager = mapping_manager
+        self.microcontroller_manager = microcontroller_manager
 
+        # Connect to microcontroller
         port = self.config_manager.get_serial_port()
         baudrate = self.config_manager.get_setting("baudrate")
+        self.microcontroller_manager.connect(port, baudrate)
+
+        # Setup mapping and settings
         self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
         self.mapping = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
-
-        try:
-            self.arduino = serial.Serial(port, baudrate, timeout=0.1)
-        except serial.SerialException:
-            QMessageBox.critical(
-                None,
-                "Application already running",
-                "The application crashed because the serial connection is busy. This may mean "
-                "that another instance is already running. Please check the system tray or the "
-                "task manager.",
-            )
-            sys.exit(0)
 
     def reload_mapping(self):
         self.mapping = self.mapping_manager.get_mapping(
@@ -48,20 +43,16 @@ class VolumeThread(QThread):
         )
 
     def run(self):
+        sliders = int(self.config_manager.get_setting("sliders"))
         while self.running:
-            # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
-            data = str(self.arduino.readline()[:-2], "utf-8")  # Trim off '\r\n'.
-            if data:
-                values = [float(val) for val in data.split("|")]
-                if len(values) != int(self.config_manager.get_setting("sliders")):
-                    return
-                for index, app in self.mapping.items():
-                    volume = values[index] / 1023
-                    if self.inverted:
-                        volume = 1 - volume
-                    app.set_volume(volume)
+            values = self.microcontroller_manager.read_values(sliders)
+            if not values:
+                continue
+
+            self.session_manager.apply_volumes(
+                values=values, mapping=self.mapping, inverted=self.inverted
+            )
 
     def stop(self):
         self.running = False
-        if hasattr(self, "arduino"):
-            self.arduino.close()
+        self.microcontroller_manager.close()
