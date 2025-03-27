@@ -12,6 +12,7 @@ comtypes = "^1.4.10"
 pycaw = "^20240210"
 pyyaml = "^6.0.1"
 black = "^25.1.0"
+pytest = "^8.3.5"
 
 [build-system]
 requires = ["poetry-core"]
