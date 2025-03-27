@@ -25,7 +25,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
 
     def read_values(self, expected_count: int) -> list[float] | None:
         """Read values from the microcontroller and validate them"""
-        if not self._connected or not self.serial:
+        if not self.is_connected or not self.serial:
             return None
 
         # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
