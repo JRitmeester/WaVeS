@@ -47,7 +47,7 @@ def main():
 
     config_path = Path.home() / "AppData/Roaming/WaVeS"
     config_manager = ConfigManager(
-        config_path, Path.cwd() / "resources" / "default_mapping.txt"
+        config_path, Path.cwd() / "resources" / "default_mapping.yml"
     )
 
     try:

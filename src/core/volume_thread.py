@@ -28,11 +28,11 @@ class VolumeThread(QThread):
 
         # Connect to microcontroller
         port = self.config_manager.get_serial_port()
-        baudrate = self.config_manager.get_setting("baudrate")
+        baudrate = self.config_manager.get_setting("device.baudrate")
         self.microcontroller_manager.connect(port, baudrate)
 
         # Setup mapping and settings
-        self.inverted = self.config_manager.get_setting("inverted").lower() == "true"
+        self.inverted = self.config_manager.get_setting("settings.inverted")
         self.mapping = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
@@ -43,7 +43,7 @@ class VolumeThread(QThread):
         )
 
     def run(self):
-        sliders = int(self.config_manager.get_setting("sliders"))
+        sliders = int(self.config_manager.get_setting("device.sliders"))
         while self.running:
             values = self.microcontroller_manager.read_values(sliders)
             if not values:

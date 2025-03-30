@@ -51,13 +51,17 @@ class MappingManager(MappingManagerProtocol):
         self, config_manager: ConfigManagerProtocol
     ) -> dict[str, int]:
         target_indices = {}
-        for idx in range(int(config_manager.get_setting("sliders"))):
-            application_str = config_manager.get_setting(str(idx))
-            if "," in application_str:
-                application_str = tuple(
-                    app.strip() for app in application_str.split(",")
-                )
-            target_indices[application_str] = int(idx)
+        sliders = int(config_manager.get_setting("device.sliders"))
+        mappings = config_manager.get_setting("mappings")
+        
+        for idx in range(sliders):
+            application_str = mappings[idx]
+            if application_str:
+                if isinstance(application_str, str) and "," in application_str:
+                    application_str = tuple(
+                        app.strip() for app in application_str.split(",")
+                    )
+                target_indices[application_str] = int(idx)
         return target_indices
 
     def _add_single_target_mapping(
@@ -129,7 +133,7 @@ class MappingManager(MappingManagerProtocol):
         ]
 
         if (
-            config_manager.get_setting("system in unmapped").lower() == "true"
+            config_manager.get_setting("settings.system_in_unmapped")
             and not session_manager.mapped_sessions["system"]
         ):
             unmapped_sessions.append(session_manager.system_session)
