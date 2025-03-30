@@ -28,7 +28,12 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         if not data:
             return None
 
-        values = [float(val) for val in data.split("|")]
+        try:
+            values = [float(val) for val in data.split("|")]
+        except ValueError:
+            print(f"Invalid data: {data}")
+            return None
+
         if len(values) != expected_count:
             return None
 
