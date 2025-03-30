@@ -10,7 +10,6 @@ from pycaw.pycaw import AudioUtilities
 from pycaw.constants import AudioDeviceState
 from sessions.session_protocol import SessionManagerProtocol
 
-
 class SessionManager(SessionManagerProtocol):
 
     def __init__(self) -> None:
@@ -54,6 +53,22 @@ class SessionManager(SessionManagerProtocol):
         if session is None:
             raise ValueError(f"Software session {session_name} not found.")
         return session
+    
+    def get_device_session(self, specified_device_name: str) -> Device:
+        """
+        See if the device is a substring of any device name.
+        If not, raise an error.
+        """
+        target_name = specified_device_name.lower().strip()
+        
+        # Check if target is substring of any device name
+        for device_name, device in self.devices.items():
+            device_name_lower = device_name.lower().strip()
+            if target_name in device_name_lower:
+                return device
+            
+        raise ValueError(f"Device {specified_device_name} not found.")
+        
 
     def create_device_sessions(self):
         for pycaw_device in self.all_pycaw_devices:
@@ -67,11 +82,6 @@ class SessionManager(SessionManagerProtocol):
             self.mapped_sessions[device.name] = False
             self.devices[device.name] = device
 
-    def get_device_session(self, device_name: str) -> Device:
-        device = self.devices.get(device_name, None)
-        if device is None:
-            raise ValueError(f"Device {device_name} not found.")
-        return device
 
     def apply_volumes(
         self, values: list[float], mapping: dict[int, Session], inverted: bool

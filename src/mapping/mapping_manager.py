@@ -31,7 +31,7 @@ class MappingManager(MappingManagerProtocol):
         for target, idx in target_indices.items():
             if isinstance(target, str):
                 self._add_single_target_mapping(
-                    target.lower(), idx, session_dict, session_manager
+                    target, idx, session_dict, session_manager
                 )
             elif isinstance(target, tuple):
                 self._add_group_mapping(target, idx, session_dict, session_manager)
@@ -101,8 +101,8 @@ class MappingManager(MappingManagerProtocol):
         for target_app in target_group:
             target_app = target_app.lower()
             if (
-                target_app in ["master", "system", "unmapped"]
-                or "device:" in target_app
+                target_app.lower() in ["master", "system", "unmapped"]
+                or "device:" in target_app.lower()
             ):
                 continue
 
