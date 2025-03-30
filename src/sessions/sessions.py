@@ -111,10 +111,7 @@ class SystemSession(SoftwareSession):
         )
         if system_pycaw_session is None:
             raise RuntimeError("System sounds session could not be found.")
-        else:
-            print(f"System sounds session found: {system_pycaw_session}")
         self.session = system_pycaw_session
-
         self.volume = self.session.SimpleAudioVolume
 
     @property
