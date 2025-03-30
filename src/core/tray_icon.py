@@ -23,6 +23,9 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.volume_thread.reload_mapping)
 
+        list_apps = menu.addAction("List Applications")
+        list_apps.triggered.connect(self.list_applications)
+
         open_config = menu.addAction("Open configuration file")
         open_config.triggered.connect(
             lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt")
@@ -61,3 +64,13 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
     def start_app(self):
         self.volume_thread.start()
+
+    def list_applications(self):
+        """Show a message box with all applications currently in the Windows Volume mixer"""
+        software_sessions = self.volume_thread.session_manager.software_sessions
+        devices = self.volume_thread.session_manager.devices
+
+        messagebox_text = "Applications:\n" + "\n".join(sorted(software_sessions.keys()))
+        messagebox_text += "\n\nDevices:\n" + "\n".join(sorted(devices.keys()))
+
+        QMessageBox.information(None, "Applications", messagebox_text)
