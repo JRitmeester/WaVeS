@@ -1,5 +1,5 @@
 from pathlib import Path
-import re
+import yaml
 from serial.tools import list_ports
 from .config_protocol import ConfigManagerProtocol
 
@@ -7,9 +7,9 @@ from .config_protocol import ConfigManagerProtocol
 class ConfigManager(ConfigManagerProtocol):
     def __init__(self, config_path: Path, default_mapping_path: Path):
         self.config_path = config_path
-        self.config_file_path = config_path / "mapping.txt"
+        self.config_file_path = config_path / "mapping.yml"
         self.default_mapping_path = default_mapping_path
-        self.lines: list[str] = []
+        self.config_data = {}
 
     def ensure_config_exists(self) -> Path:
         """
@@ -22,30 +22,36 @@ class ConfigManager(ConfigManagerProtocol):
 
     def load_config(self) -> None:
         """
-        Load the config file and store the lines in the lines attribute.
+        Load the YAML config file and store the data.
         """
-        self.lines = self.config_file_path.read_text().strip().split("\n")
+        with open(self.config_file_path) as f:
+            self.config_data = yaml.safe_load(f)
 
-    def get_setting(self, text: str) -> str:
+    def get_setting(self, path: str) -> str:
         """
-        Get the value of a setting from the config file.
+        Get the value of a setting from the config file using dot notation.
+        Example: 'device.baudrate' will return the baudrate under the device section
         """
-        matching_settings = list(filter(lambda x: text + ":" in x, self.lines))
-        if len(matching_settings) == 0:
-            raise ValueError(f"Setting {text} is not found in the configuration file.")
-
-        value = re.search(r"^[^:]*:[ \t]*(.*?)[ \t]*$", matching_settings[0])
-        if value.group(1) == "":
-            raise ValueError(f"Setting {text} is present but empty.")
-        return value.group(1)
+        keys = path.split('.')
+        value = self.config_data
+        for key in keys:
+            if isinstance(value, dict):
+                if key not in value:
+                    raise ValueError(f"Setting {path} is not found in the configuration file.")
+                value = value[key]
+            else:
+                raise ValueError(f"Cannot access {key} in {path} as parent is not a dictionary")
+                
+        if value is None:
+            raise ValueError(f"Setting {path} is present but empty.")
+        return value
 
     def get_serial_port(self) -> str:
         """
         Try to find the serial port from the config file, first by device name.
-        If the device name cannot be matched to a port, return the port specified in the config file.        
-        Note that if there a multiple devices with the same name, the first one found will be returned.
+        If the device name cannot be matched to a port, return the port specified in the config file.
         """
-        device_name = self.get_setting("device name")
+        device_name = self.get_setting("device.name")
         ports = list_ports.comports()
 
         # Try to find port by device name first
@@ -55,7 +61,7 @@ class ConfigManager(ConfigManagerProtocol):
 
         # Fall back to explicit port setting if device not found
         try:
-            return self.get_setting("port")
+            return self.get_setting("device.port")
         except ValueError:
             raise ValueError("The config file does not contain the right device name or an appropriate port.")
 

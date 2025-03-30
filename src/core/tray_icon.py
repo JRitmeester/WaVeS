@@ -28,7 +28,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         open_config = menu.addAction("Open configuration file")
         open_config.triggered.connect(
-            lambda: webbrowser.open(utils.get_appdata_path() / "mapping.txt")
+            lambda: webbrowser.open(utils.get_appdata_path() / "mapping.yml")
         )
 
         exit_ = menu.addAction("Exit")
