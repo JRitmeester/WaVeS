@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    ['src/main.py'],
+    pathex=['src'],
     binaries=[],
     datas=[('resources/icon.ico', '.')],
-    hiddenimports=['win32api'],
+    hiddenimports=['win32api', 'pyserial'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
