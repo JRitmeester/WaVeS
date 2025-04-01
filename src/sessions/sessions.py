@@ -147,6 +147,7 @@ class Device(AudioDevice, Session):
             CLSID_MMDeviceEnumerator, IMMDeviceEnumerator, comtypes.CLSCTX_INPROC_SERVER
         )
 
+
         speaker = (
             device_enumerator.GetDevice(self.pycaw_device.id)
             if self.pycaw_device.id is not None
@@ -154,6 +155,7 @@ class Device(AudioDevice, Session):
                 EDataFlow.eRender.value, ERole.eMultimedia.value
             )
         )
+
 
         if not speaker:
             raise RuntimeError(
