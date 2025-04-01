@@ -30,19 +30,23 @@ only one device with the name "Speakers" in either one, you can just use that.
 ## Example config file
 An example of a config file (without comments) is:
 ```
-0: master
-1: system
-2: chrome.exe, isaac-ng.exe, spotify.exe
-3: discord.exe
-4: unmapped
-5: device: Speakers (Realtek High Definition Audio)
+mappings:
+  0: master
+  1: system
+  2: chrome.exe
+  3: spotify.exe
+  4: unmapped
 
-sliders: 6      # Number of sliders you have
-port: COM7       # COM port used for automatic detection
-device name: Arduino Micro  # Name of the device in device manager, used if COM port changes.
-baudrate: 9600   # Baudrate of the microcontroller
-inverted: False  # Invert the volume
-system in unmapped: True     # Include system sounds in unmapped if it isn't explicitly assigned to anything.
+device:
+  name: "Arduino Micro"
+  port: "COM6"
+  baudrate: 9600
+  sliders: 5
+
+settings:
+  inverted: false
+  system_in_unmapped: true
+  session_reload_interval: 1
 ```
 
 Apps can be excluded from "unmapped" by assigning specific apps to a number equal to or higher than the number of sliders you have:
