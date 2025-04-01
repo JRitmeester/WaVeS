@@ -11,3 +11,47 @@ class MappingManagerProtocol(Protocol):
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, Session]: ...
+
+    def create_mappings(
+        self,
+        session_manager: SessionManagerProtocol,
+        config_manager: ConfigManagerProtocol,
+    ) -> dict[int, Session]: ...
+
+    def get_target_indices(
+        self,
+        config_manager: ConfigManagerProtocol,
+    ) -> dict[str, int]: ...
+
+    def _add_single_target_mapping(
+        self,
+        target: str,
+        idx: int,
+        session_dict: dict[int, Session],
+        session_manager: SessionManagerProtocol,
+    ) -> None: ...
+
+    def _add_software_session(
+        self,
+        target: str,    
+        idx: int,
+        session_dict: dict[int, Session],
+        session_manager: SessionManagerProtocol,
+    ) -> None: ...
+
+    def _add_group_mapping(
+        self,
+        target_group: tuple[str, ...],
+        idx: int,
+        session_dict: dict[int, Session],
+        session_manager: SessionManagerProtocol,
+    ) -> None: ...      
+
+    def _add_unmapped_sessions(
+        self,
+        idx: int,
+        session_dict: dict[int, Session],
+        session_manager: SessionManagerProtocol,
+        config_manager: ConfigManagerProtocol,
+    ) -> None: ...
+
