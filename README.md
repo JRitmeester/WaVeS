@@ -10,22 +10,14 @@ The Arduino code can be found [here](https://github.com/omriharel/deej/blob/mast
 
 ## Installation
 
-The [executable](https://github.com/JRitmeester/WaVeS/releases/) can be downloaded as-is. It will create a `mappings.txt` file in the same directory as where the executable was run. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
+Opening the executable for the first time will create a `mappings.yml` file in `%AppData%/WaVeS`. This serves as the configuration file. Please read the contents of the file to see how you can designate each slider to on of the following:
+* Master volume (`master`)
+* System volume (`system`)
 * A specific application (`chrome.exe`, `spotify.exe`, games, etc.)
-* System volume
+* A specific output device (see below)
 * Unmapped (everything that does not have its own slider)
-* Master volume
+
 * A specific output device. 
-  
-## Specifying an output device.
-To find the right name, go to Sound > Playback and find the name of the speaker you want to adjust. This does not have 
-to be your default speaker (Otherwise you can just use "master"). You can specify a small part of the string if you 
-want. The full format is: `device: [device name in black] ([device name in gray])`
-
-Where you replace the first part `[device name in black]` with... the device name in black (like "Speakers) and the same
-for `[device name in gray]`, like "Realtek High Definition Audio". Note the need for the parentheses `()`! If there is 
-only one device with the name "Speakers" in either one, you can just use that.
-
 
 ## Example config file
 An example of a config file (without comments) is:
@@ -55,14 +47,12 @@ settings:
   session_reload_interval: 1  # Interval in seconds to check for new applications
 ```
 
-Apps can be excluded from "unmapped" by assigning specific apps to a number equal to or higher than the number of sliders you have:
+Unassigned apps can be excluded from "unmapped" by assigning those apps to a non-existent slider number:
 ```
-1000: chrome.exe
+1000:
+    - chrome.exe
 ```
 This will allow you to control all unmapped apps with "unmapped" but exclude Chrome. Why you'd want this, I'm not sure, but it's probably useful in some edge cases.
-
-## Usage
-Upon running the executable, a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
 
 ## Customisation
 You are free to use the source code. The repository contains a `build.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.
