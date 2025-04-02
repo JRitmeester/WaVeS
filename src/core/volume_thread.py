@@ -38,9 +38,10 @@ class VolumeThread(QThread):
         )
 
         # Setup session change monitoring
+        session_reload_interval = self.config_manager.get_setting("settings.session_reload_interval")
         self._check_timer = QTimer()
         self._check_timer.timeout.connect(self._check_for_changes)
-        self._check_timer.start(5000)  # Check every 5 seconds
+        self._check_timer.start(session_reload_interval * 1000)
 
     def _check_for_changes(self):
         """Periodically check for session changes"""
