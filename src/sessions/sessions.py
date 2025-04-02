@@ -43,7 +43,7 @@ class SoftwareSession(Session):
 
     @property
     def name(self) -> str:
-        return self.session.Process.name()
+        return self.session.Process.name() + f" ({self.session.Process.pid})"
 
     def __repr__(self):
         return f"Session(name={self.name})"

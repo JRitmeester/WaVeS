@@ -38,7 +38,7 @@ class SessionManager(SessionManagerProtocol):
 
     def _get_session_ids(self) -> Set[str]:
         """Get a set of unique identifiers for all current sessions"""
-        return {session.Process.name() for session in self.all_pycaw_sessions if session.Process is not None}
+        return {session.Process.pid for session in self.all_pycaw_sessions if session.Process is not None}
 
     def _get_device_ids(self) -> Set[str]:
         """Get a set of unique identifiers for all current devices"""
@@ -55,7 +55,7 @@ class SessionManager(SessionManagerProtocol):
         current_device_ids = self._get_device_ids()
         
         # Get new IDs for comparison
-        new_session_ids = {session.Process.name() for session in new_sessions if session.Process is not None}
+        new_session_ids = {session.Process.pid for session in new_sessions if session.Process is not None}
         new_device_ids = {device.id for device in new_devices if device.FriendlyName is not None}
         
         # Check if there are any changes
