@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox, QDialog, QVBoxLayout, QTextEdit, QPushButton
+from PyQt5.QtGui import QIcon
 import utils.utils as utils
 from core.volume_thread import VolumeThread
 import webbrowser
@@ -8,7 +9,7 @@ import webbrowser
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
-    def __init__(self, icon, volume_thread: VolumeThread, parent=None):
+    def __init__(self, icon: QIcon, volume_thread: VolumeThread, parent: QtWidgets.QWidget):
         QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
         self.icon = icon
         self.volume_thread = volume_thread  # Injected dependency
