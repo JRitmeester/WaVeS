@@ -16,7 +16,7 @@ class SessionManager(SessionManagerProtocol):
     def __init__(self) -> None:
         self.all_pycaw_sessions = AudioUtilities.GetAllSessions()
         self.all_pycaw_devices = AudioUtilities.GetAllDevices()
-        self.software_sessions = {}
+        self.software_sessions = []
         self._master_session: MasterSession = MasterSession()
         self._system_session: SystemSession = SystemSession()
         self.devices: dict[str, Device] = {}
@@ -88,14 +88,16 @@ class SessionManager(SessionManagerProtocol):
         )  # Filter out system sounds and sessions without Process
         for pycaw_session in pycaw_software_sessions:
             session = SoftwareSession(pycaw_session)
-            self.mapped_sessions[session.name] = False
-            self.software_sessions[session.name] = session
+            # Use unique_name (with PID) for software_sessions dictionary
+            self.software_sessions.append(session)
+            # Use process name (without PID) for mapped_sessions dictionary
+            self.mapped_sessions[session.unique_name] = False
 
-    def get_software_session(self, session_name: str) -> Session:
-        session = self.software_sessions.get(session_name, None)
-        if session is None:
-            raise ValueError(f"Software session {session_name} not found.")
-        return session
+    def get_software_session_by_name(self, session_name: str) -> Session:
+        return next((s for s in self.software_sessions if s.name == session_name), None)
+    
+    def get_software_session_by_unique_name(self, unique_name: str) -> Session:
+        return next((s for s in self.software_sessions if s.unique_name == unique_name), None)  
     
     def get_device_session(self, specified_device_name: str) -> Device:
         """
@@ -130,8 +132,9 @@ class SessionManager(SessionManagerProtocol):
         self, values: list[float], mapping: dict[int, Session], inverted: bool
     ) -> None:
         """Apply volume values to the mapped sessions"""
-        for index, session in mapping.items():
+        for index, sessions in mapping.items():
             volume = values[index]
             if inverted:
                 volume = 1 - volume
-            session.set_volume(volume)
+            for session in sessions:
+               session.set_volume(volume)

@@ -43,10 +43,16 @@ class SoftwareSession(Session):
 
     @property
     def name(self) -> str:
+        """The unique identifier combining process name and PID"""
+        return self.session.Process.name()
+
+    @property
+    def unique_name(self) -> str:
+        """The display name including PID, used for UI purposes"""
         return self.session.Process.name() + f" ({self.session.Process.pid})"
 
     def __repr__(self):
-        return f"Session(name={self.name})"
+        return f"Session(unique_name={self.unique_name})"
 
     def set_volume(self, value):
         self.volume.SetMasterVolume(value, None)
@@ -61,7 +67,7 @@ class SessionGroup:
         self.sessions = sessions
 
     def __repr__(self):
-        return f"SessionGroup(sessions={[session.name for session in self.sessions]})"
+        return f"SessionGroup(sessions={[session.unique_name for session in self.sessions]})"
 
     def __contains__(self, item: AudioSession):
         if type(item) == AudioSession:
@@ -117,6 +123,10 @@ class SystemSession(SoftwareSession):
     @property
     def name(self) -> str:
         return "system"
+    
+    @property
+    def unique_name(self) -> str:
+        return "system"
 
     def set_volume(self, value):
         super().set_volume(value)
@@ -125,7 +135,7 @@ class SystemSession(SoftwareSession):
         return super().get_volume()
 
     def __repr__(self):
-        return self.name
+        return self.unique_name
 
 
 class Device(AudioDevice, Session):

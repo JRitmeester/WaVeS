@@ -1,7 +1,7 @@
 from sessions.session_protocol import SessionManagerProtocol
 from config.config_protocol import ConfigManagerProtocol
 from mapping.mapping_protocol import MappingManagerProtocol
-from sessions.sessions import Session, SessionGroup
+from sessions.sessions import Session, SessionGroup, Device
 
 
 class MappingManager(MappingManagerProtocol):
@@ -21,48 +21,49 @@ class MappingManager(MappingManagerProtocol):
         self,
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
-    ) -> dict[int, Session]:
+    ) -> dict[int, list[Session | Device]]:
 
         target_indices = self.get_target_indices(config_manager)
 
-        session_dict = {}
+        sliders = int(config_manager.get_setting("device.sliders"))
+        session_dict = {i: [] for i in range(sliders)}
 
         # Process each target mapping
-        for target, idx in target_indices.items():
-            if isinstance(target, str):
+        for idx, targets in target_indices.items():
+            for target in targets:
                 self._add_single_target_mapping(
                     target, idx, session_dict, session_manager
                 )
-            elif isinstance(target, tuple):
-                self._add_group_mapping(target, idx, session_dict, session_manager)
+            # elif isinstance(target, tuple):
+            #     self._add_group_mapping(target, idx, session_dict, session_manager)
 
         # Handle unmapped sessions
-        if "unmapped" in target_indices:
-            self._add_unmapped_sessions(
-                target_indices["unmapped"],
-                session_dict,
-                session_manager,
-                config_manager,
+        for idx, targets in target_indices.items(): 
+            if "unmapped" in targets:
+                self._add_unmapped_sessions(
+                    idx,
+                    session_dict,
+                    session_manager,
+                    config_manager,
             )
 
         return session_dict
 
     def get_target_indices(
         self, config_manager: ConfigManagerProtocol
-    ) -> dict[str, int]:
-        target_indices = {}
-        sliders = int(config_manager.get_setting("device.sliders"))
+    ) -> dict[int, str]:
         mappings = config_manager.get_setting("mappings")
-        
-        for idx in range(sliders):
-            application_str = mappings[idx]
-            if application_str:
-                if isinstance(application_str, str) and "," in application_str:
-                    application_str = tuple(
-                        app.strip() for app in application_str.split(",")
-                    )
-                target_indices[application_str] = int(idx)
-        return target_indices
+        return mappings
+
+        # for idx in range(sliders):
+        #     application_str = mappings[idx]
+        #     if application_str:
+        #         if isinstance(application_str, str) and "," in application_str:
+        #             application_str = tuple(
+        #                 app.strip() for app in application_str.split(",")
+        #             )
+        #         target_indices[application_str] = int(idx)
+        # return target_indices
 
     def _add_single_target_mapping(
         self,
@@ -72,11 +73,13 @@ class MappingManager(MappingManagerProtocol):
         session_manager: SessionManagerProtocol,
     ) -> None:
         if target == "master":
-            session_dict[idx] = session_manager.master_session
+            session_dict[idx].append(session_manager.master_session)
+            session_manager.mapped_sessions["master"] = True
         elif target == "system":
-            session_dict[idx] = session_manager.system_session
+            session_dict[idx].append(session_manager.system_session)
+            session_manager.mapped_sessions["system"] = True
         elif target.startswith("device:"):
-            session_dict[idx] = session_manager.get_device_session(target[7:])
+            session_dict[idx].append(session_manager.get_device_session(target[7:]))
         elif target != "unmapped":
             self._add_software_session(target, idx, session_dict, session_manager)
 
@@ -87,11 +90,11 @@ class MappingManager(MappingManagerProtocol):
         session_dict: dict[int, Session],
         session_manager: SessionManagerProtocol,
     ) -> None:
-        if target in session_manager.software_sessions:
-            session = session_manager.software_sessions.get(target)
-            if session is not None:
-                session_dict[idx] = session
-                session_manager.mapped_sessions[session.name] = True
+        for session in session_manager.software_sessions:
+            if target.lower() in session.name.lower():
+                session_dict[idx].append(session)
+                session_manager.mapped_sessions[session.unique_name] = True
+
 
     def _add_group_mapping(
         self,
@@ -110,14 +113,14 @@ class MappingManager(MappingManagerProtocol):
             ):
                 continue
 
-            session = session_manager.software_sessions.get(target_app)
+            session = session_manager.get_software_session_by_name(target_app)
             if session is not None:
                 active_sessions.append(session)
 
         if active_sessions:
             session_dict[idx] = SessionGroup(sessions=active_sessions)
             for session in active_sessions:
-                session_manager.mapped_sessions[session.name] = True
+                session_manager.mapped_sessions[session.unique_name] = True
 
     def _add_unmapped_sessions(
         self,
@@ -127,9 +130,9 @@ class MappingManager(MappingManagerProtocol):
         config_manager: ConfigManagerProtocol,
     ) -> None:
         unmapped_sessions = [
-            s
-            for s in session_manager.software_sessions.values()
-            if not session_manager.mapped_sessions[s.name]
+            session
+            for session in session_manager.software_sessions
+            if not session_manager.mapped_sessions[session.unique_name]
         ]
 
         if (
@@ -138,6 +141,6 @@ class MappingManager(MappingManagerProtocol):
         ):
             unmapped_sessions.append(session_manager.system_session)
 
-        session_dict[idx] = SessionGroup(sessions=unmapped_sessions)
+        session_dict[idx].extend(unmapped_sessions)
         for session in unmapped_sessions:
-            session_manager.mapped_sessions[session.name] = True
+            session_manager.mapped_sessions[session.unique_name] = True

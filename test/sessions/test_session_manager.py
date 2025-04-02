@@ -12,14 +12,15 @@ from pycaw.constants import AudioDeviceState
 
 
 class MockAudioSession:
-    def __init__(self, name: str, display_name: str = None):
+    def __init__(self, name: str, display_name: str = None, pid: int = 1234):
         self.Process = Mock()
         self.Process.name.return_value = name
+        self.Process.pid = pid
         self.DisplayName = display_name or name
         self.SimpleAudioVolume = Mock()
         self.SimpleAudioVolume.GetMasterVolume.return_value = 0.5
         self.SimpleAudioVolume.SetMasterVolume = Mock()
-        self.id = f"session_{name}"
+        self.id = f"session_{name}_{pid}"
 
 
 class MockAudioDevice:
@@ -179,8 +180,8 @@ def test_get_software_session(session_manager: SessionManager):
     """Test getting a software session"""
     # Setup mock data
     mock_sessions = [
-        MockAudioSession("chrome.exe"),
-        MockAudioSession("spotify.exe"),
+        MockAudioSession("chrome.exe", pid=1234),
+        MockAudioSession("spotify.exe", pid=5678),
     ]
     
     # Mock the AudioUtilities methods to return our mock data
@@ -191,7 +192,7 @@ def test_get_software_session(session_manager: SessionManager):
         # Test successful retrieval
         session = session_manager.get_software_session("chrome.exe")
         assert isinstance(session, SoftwareSession)
-        assert session.name == "chrome.exe"
+        assert session.name == "chrome.exe (1234)"
         
         # Test non-existent session
         with pytest.raises(ValueError, match="Software session nonexistent.exe not found."):
@@ -223,7 +224,7 @@ def test_apply_volumes(session_manager: SessionManager):
 def test_session_addition(session_manager: SessionManager):
     """Test that the session manager correctly detects and handles new sessions"""
     # Initial setup with one session
-    initial_sessions = [MockAudioSession("chrome.exe")]
+    initial_sessions = [MockAudioSession("chrome.exe", pid=1234)]
     session_manager.all_pycaw_sessions = initial_sessions
     session_manager.reload_sessions_and_devices()
     
@@ -234,8 +235,8 @@ def test_session_addition(session_manager: SessionManager):
     
     # Mock AudioUtilities to simulate a new session being added
     new_sessions = [
-        MockAudioSession("chrome.exe"),
-        MockAudioSession("spotify.exe")
+        MockAudioSession("chrome.exe", pid=1234),
+        MockAudioSession("spotify.exe", pid=5678)
     ]
     
     with patch('sessions.session_manager.AudioUtilities.GetAllSessions', return_value=new_sessions):
@@ -251,13 +252,13 @@ def test_session_addition(session_manager: SessionManager):
         # Verify the new session is properly initialized
         spotify_session = session_manager.software_sessions["spotify.exe"]
         assert isinstance(spotify_session, SoftwareSession)
-        assert spotify_session.name == "spotify.exe"
+        assert spotify_session.name == "spotify.exe (5678)"
         assert spotify_session.session.Process.name() == "spotify.exe"
         
         # Verify the existing session remains unchanged
         chrome_session = session_manager.software_sessions["chrome.exe"]
         assert isinstance(chrome_session, SoftwareSession)
-        assert chrome_session.name == "chrome.exe"
+        assert chrome_session.name == "chrome.exe (1234)"
         assert chrome_session.session.Process.name() == "chrome.exe"
         
         # Verify mapped_sessions is updated
@@ -279,3 +280,41 @@ def test_no_changes_detected(session_manager: SessionManager):
         # Verify sessions remain unchanged
         assert len(session_manager.software_sessions) == 1
         assert "chrome.exe" in session_manager.software_sessions
+
+def test_multiple_sessions_same_name(session_manager: SessionManager):
+    """Test that multiple sessions with the same process name but different PIDs are handled correctly"""
+    # Setup mock data with two Discord sessions
+    mock_sessions = [
+        MockAudioSession("discord.exe", pid=1234),
+        MockAudioSession("discord.exe", pid=5678),
+    ]
+    
+    # Mock the AudioUtilities methods to return our mock data
+    with patch('sessions.session_manager.AudioUtilities.GetAllSessions', return_value=mock_sessions):
+        session_manager.all_pycaw_sessions = mock_sessions
+        session_manager.reload_sessions_and_devices()
+        
+        # Verify only one entry exists in software_sessions for discord.exe
+        assert len(session_manager.software_sessions) == 1
+        assert "discord.exe" in session_manager.software_sessions
+        
+        # Get the session and verify it's a SoftwareSession
+        session = session_manager.get_software_session("discord.exe")
+        assert isinstance(session, SoftwareSession)
+        assert session.name == "discord.exe (1234)"  # First session's name should be used
+        
+        # Test volume application affects all sessions with the same name
+        mapping = {0: session}
+        values = [0.75]
+        
+        session_manager.apply_volumes(values, mapping, inverted=False)
+        
+        # Verify volume was set for both sessions
+        for mock_session in mock_sessions:
+            mock_session.SimpleAudioVolume.SetMasterVolume.assert_called_with(0.75, None)
+            
+        # Verify that both sessions are part of the same group
+        assert len(session_manager.software_sessions["discord.exe"].sessions) == 2
+        session_names = [s.name for s in session_manager.software_sessions["discord.exe"].sessions]
+        assert "discord.exe (1234)" in session_names
+        assert "discord.exe (5678)" in session_names

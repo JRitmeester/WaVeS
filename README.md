@@ -31,22 +31,28 @@ only one device with the name "Speakers" in either one, you can just use that.
 An example of a config file (without comments) is:
 ```
 mappings:
-  0: master
-  1: system
-  2: chrome.exe
-  3: spotify.exe
-  4: unmapped
+  0:
+    - master
+  1:
+    - system
+  2:
+    - discord.exe
+  3:
+    - brave.exe
+    - spotify.exe
+  4:
+    - unmapped
 
 device:
   name: "Arduino Micro"
-  port: "COM6"
+  port: "COM6"  # Only used if device name cannot be found automatically
   baudrate: 9600
   sliders: 5
 
 settings:
-  inverted: false
-  system_in_unmapped: true
-  session_reload_interval: 1
+  inverted: false  # When true: top=low volume, bottom=high volume
+  system_in_unmapped: true  # Include system sounds in 'unmapped' if not explicitly assigned
+  session_reload_interval: 1  # Interval in seconds to check for new applications
 ```
 
 Apps can be excluded from "unmapped" by assigning specific apps to a number equal to or higher than the number of sliders you have:

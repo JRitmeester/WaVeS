@@ -72,7 +72,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         software_sessions = self.volume_thread.session_manager.software_sessions
         devices = self.volume_thread.session_manager.devices
 
-        messagebox_text = "Sessions:\n" + "\n".join(sorted(software_sessions.keys()))
+        messagebox_text = "Sessions:\n" + "\n".join(sorted([session.name for session in software_sessions]))
         messagebox_text += "\n\nDevices:\n" + "\n".join(sorted(devices.keys()))
 
         if self.info_dialog is None:
