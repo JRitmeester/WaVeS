@@ -9,6 +9,7 @@ from sessions.sessions import (
 from pycaw.pycaw import AudioUtilities
 from pycaw.constants import AudioDeviceState
 from sessions.session_protocol import SessionManagerProtocol
+from typing import Set
 
 class SessionManager(SessionManagerProtocol):
 
@@ -23,6 +24,8 @@ class SessionManager(SessionManagerProtocol):
             "master": False,
             "system": False,
         }
+        self._last_session_ids: Set[str] = set()
+        self._last_device_ids: Set[str] = set()
         self.reload_sessions_and_devices()
 
     @property
@@ -33,16 +36,56 @@ class SessionManager(SessionManagerProtocol):
     def master_session(self) -> MasterSession:
         return self._master_session
 
+    def _get_session_ids(self) -> Set[str]:
+        """Get a set of unique identifiers for all current sessions"""
+        return {session.Process.name() for session in self.all_pycaw_sessions if session.Process is not None}
+
+    def _get_device_ids(self) -> Set[str]:
+        """Get a set of unique identifiers for all current devices"""
+        return {device.id for device in self.all_pycaw_devices if device.FriendlyName is not None}
+
+    def check_for_changes(self) -> bool:
+        """Check if there are any changes in sessions or devices"""
+        # Get new sessions and devices without modifying current state
+        new_sessions = AudioUtilities.GetAllSessions()
+        new_devices = AudioUtilities.GetAllDevices()
+        
+        # Get current IDs for comparison
+        current_session_ids = self._get_session_ids()
+        current_device_ids = self._get_device_ids()
+        
+        # Get new IDs for comparison
+        new_session_ids = {session.Process.name() for session in new_sessions if session.Process is not None}
+        new_device_ids = {device.id for device in new_devices if device.FriendlyName is not None}
+        
+        # Check if there are any changes
+        session_changes = new_session_ids != current_session_ids
+        device_changes = new_device_ids != current_device_ids
+        
+        if session_changes or device_changes:
+            # Update state with new sessions and devices
+            self.all_pycaw_sessions = new_sessions
+            self.all_pycaw_devices = new_devices
+            self._last_session_ids = new_session_ids
+            self._last_device_ids = new_device_ids
+            return True
+        return False
+
     def reload_sessions_and_devices(self):
-        self.all_pycaw_sessions = AudioUtilities.GetAllSessions()
-        self.all_pycaw_devices = AudioUtilities.GetAllDevices()
+        """Reload all sessions and devices"""
+        # Clear existing sessions and devices
+        self.software_sessions.clear()
+        self.devices.clear()
+        
+        # Recreate sessions and devices
         self.create_software_sessions()
         self.create_device_sessions()
 
     def create_software_sessions(self):
         pycaw_software_sessions = filter(
-            lambda x: x.Process is not None, self.all_pycaw_sessions
-        )  # Filter out system sounds
+            lambda x: x.Process is not None and "SystemRoot" not in x.DisplayName,
+            self.all_pycaw_sessions
+        )  # Filter out system sounds and sessions without Process
         for pycaw_session in pycaw_software_sessions:
             session = SoftwareSession(pycaw_session)
             self.mapped_sessions[session.name] = False

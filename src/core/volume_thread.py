@@ -1,6 +1,6 @@
 import sys
 import serial
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, QTimer
 from PyQt5.QtWidgets import QMessageBox
 from sessions.session_manager import SessionManagerProtocol
 from config.config_manager import ConfigManagerProtocol
@@ -37,7 +37,19 @@ class VolumeThread(QThread):
             self.session_manager, self.config_manager
         )
 
+        # Setup session change monitoring
+        self._check_timer = QTimer()
+        self._check_timer.timeout.connect(self._check_for_changes)
+        self._check_timer.start(5000)  # Check every 5 seconds
+
+    def _check_for_changes(self):
+        """Periodically check for session changes"""
+        if self.running and self.session_manager.check_for_changes():
+            self.session_manager.reload_sessions_and_devices()
+            self.reload_mapping()
+
     def reload_mapping(self):
+        """Reload the mapping when sessions change"""
         self.mapping = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
@@ -54,5 +66,7 @@ class VolumeThread(QThread):
             )
 
     def stop(self):
+        """Stop the thread and clean up resources"""
         self.running = False
+        self._check_timer.stop()
         self.microcontroller_manager.close()

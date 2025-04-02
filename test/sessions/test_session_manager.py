@@ -2,14 +2,12 @@ import pytest
 from unittest.mock import Mock, patch
 from sessions.session_manager import SessionManager
 from sessions.sessions import (
-    SessionGroup,
     MasterSession,
-    Session,
     SystemSession,
     Device,
     SoftwareSession,
 )
-from pycaw.pycaw import AudioUtilities, AudioSession, AudioDevice
+from pycaw.pycaw import AudioDevice
 from pycaw.constants import AudioDeviceState
 
 
@@ -21,6 +19,7 @@ class MockAudioSession:
         self.SimpleAudioVolume = Mock()
         self.SimpleAudioVolume.GetMasterVolume.return_value = 0.5
         self.SimpleAudioVolume.SetMasterVolume = Mock()
+        self.id = f"session_{name}"
 
 
 class MockAudioDevice:
@@ -47,6 +46,7 @@ class MockAudioDevice:
 
 class MockMasterSession(MasterSession):
     def __init__(self):
+        # Don't call parent's __init__ to avoid COM interface calls
         self.volume = Mock()
         self.volume.GetMasterVolumeLevelScalar.return_value = 0.5
         self.volume.SetMasterVolumeLevelScalar = Mock()
@@ -64,6 +64,7 @@ class MockMasterSession(MasterSession):
 
 class MockSystemSession(SystemSession):
     def __init__(self):
+        # Don't call parent's __init__ to avoid COM interface calls
         self.session = MockAudioSession("System Sounds", "SystemRoot\\System32\\SystemSounds")
         self.volume = self.session.SimpleAudioVolume
 
@@ -111,21 +112,58 @@ class MockDevice(Device):
 def session_manager():
     # Mock AudioUtilities
     mock_audio_utilities = Mock()
-    mock_audio_utilities.GetAllSessions.return_value = []
-    mock_audio_utilities.GetAllDevices.return_value = []
-    mock_audio_utilities.GetSpeakers.return_value = Mock()
     
-    # Mock COM interface calls
+    # Create a mock system sounds session
+    mock_system_session = MockAudioSession("System Sounds", "SystemRoot\\System32\\SystemSounds")
+    mock_audio_utilities.GetAllSessions.return_value = [mock_system_session]
+    mock_audio_utilities.GetAllDevices.return_value = []
+    
+    # Create a simple mock for the speakers device
+    mock_speakers = Mock()
+    mock_speakers.FriendlyName = "Speakers"
+    mock_speakers.state = AudioDeviceState.Active
+    mock_speakers.id = "test_device_speakers"
+    mock_speakers.properties = {}
+    mock_speakers._dev = Mock()
+    mock_speakers.volume = Mock()
+    mock_speakers.volume.GetMasterVolumeLevelScalar.return_value = 0.5
+    mock_speakers.volume.SetMasterVolumeLevelScalar = Mock()
+    mock_audio_utilities.GetSpeakers.return_value = mock_speakers
+    
+    # Mock COM interface calls with a simple mock
     mock_device_enumerator = Mock()
     mock_device_enumerator.GetDevice.return_value = Mock()
     mock_device_enumerator.GetDefaultAudioEndpoint.return_value = Mock()
     
-    with patch('sessions.session_manager.AudioUtilities', mock_audio_utilities), \
-         patch('sessions.sessions.MasterSession', MockMasterSession), \
-         patch('sessions.sessions.SystemSession', MockSystemSession), \
-         patch('sessions.sessions.Device', MockDevice), \
-         patch('sessions.sessions.comtypes.CoCreateInstance', return_value=mock_device_enumerator):
-        return SessionManager()
+    # Mock the cast function to return a mock volume interface
+    mock_volume_interface = Mock()
+    mock_volume_interface.GetMasterVolumeLevelScalar.return_value = 0.5
+    mock_volume_interface.SetMasterVolumeLevelScalar = Mock()
+    mock_cast = Mock(return_value=mock_volume_interface)
+    
+    # Create patches for all the necessary components
+    patches = [
+        patch('sessions.session_manager.AudioUtilities', mock_audio_utilities),
+        patch('sessions.sessions.MasterSession', MockMasterSession),
+        patch('sessions.sessions.SystemSession', MockSystemSession),
+        patch('sessions.sessions.Device', MockDevice),
+        patch('sessions.sessions.comtypes.CoCreateInstance', return_value=mock_device_enumerator),
+        patch('sessions.sessions.AudioUtilities', mock_audio_utilities),
+        patch('sessions.sessions.cast', mock_cast),
+    ]
+    
+    # Apply all patches
+    for p in patches:
+        p.start()
+    
+    # Create the session manager
+    manager = SessionManager()
+    
+    # Clean up patches after the test
+    yield manager
+    
+    for p in patches:
+        p.stop()
 
 
 def test_initialization(session_manager: SessionManager):
@@ -181,3 +219,63 @@ def test_apply_volumes(session_manager: SessionManager):
         session_manager.software_sessions["chrome.exe"].session.SimpleAudioVolume.SetMasterVolume.reset_mock()
         session_manager.apply_volumes(values, mapping, inverted=True)
         session_manager.software_sessions["chrome.exe"].session.SimpleAudioVolume.SetMasterVolume.assert_called_once_with(0.25, None)
+
+def test_session_addition(session_manager: SessionManager):
+    """Test that the session manager correctly detects and handles new sessions"""
+    # Initial setup with one session
+    initial_sessions = [MockAudioSession("chrome.exe")]
+    session_manager.all_pycaw_sessions = initial_sessions
+    session_manager.reload_sessions_and_devices()
+    
+    # Verify initial state
+    assert len(session_manager.software_sessions) == 1
+    assert "chrome.exe" in session_manager.software_sessions
+    assert "spotify.exe" not in session_manager.software_sessions
+    
+    # Mock AudioUtilities to simulate a new session being added
+    new_sessions = [
+        MockAudioSession("chrome.exe"),
+        MockAudioSession("spotify.exe")
+    ]
+    
+    with patch('sessions.session_manager.AudioUtilities.GetAllSessions', return_value=new_sessions):
+        # Check for changes - this should detect the new session
+        assert session_manager.check_for_changes() is True
+        
+        # Reload sessions and verify the new session is added
+        session_manager.reload_sessions_and_devices()
+        assert len(session_manager.software_sessions) == 2
+        assert "chrome.exe" in session_manager.software_sessions
+        assert "spotify.exe" in session_manager.software_sessions
+        
+        # Verify the new session is properly initialized
+        spotify_session = session_manager.software_sessions["spotify.exe"]
+        assert isinstance(spotify_session, SoftwareSession)
+        assert spotify_session.name == "spotify.exe"
+        assert spotify_session.session.Process.name() == "spotify.exe"
+        
+        # Verify the existing session remains unchanged
+        chrome_session = session_manager.software_sessions["chrome.exe"]
+        assert isinstance(chrome_session, SoftwareSession)
+        assert chrome_session.name == "chrome.exe"
+        assert chrome_session.session.Process.name() == "chrome.exe"
+        
+        # Verify mapped_sessions is updated
+        assert "spotify.exe" in session_manager.mapped_sessions
+        assert session_manager.mapped_sessions["spotify.exe"] is False
+
+def test_no_changes_detected(session_manager: SessionManager):
+    """Test that no changes are detected when sessions remain the same"""
+    # Initial setup
+    initial_sessions = [MockAudioSession("chrome.exe")]
+    session_manager.all_pycaw_sessions = initial_sessions
+    session_manager.reload_sessions_and_devices()
+    
+    # Mock AudioUtilities to return the same sessions
+    with patch('sessions.session_manager.AudioUtilities.GetAllSessions', return_value=initial_sessions):
+        # Check for changes - this should not detect any changes
+        assert session_manager.check_for_changes() is False
+        
+        # Verify sessions remain unchanged
+        assert len(session_manager.software_sessions) == 1
+        assert "chrome.exe" in session_manager.software_sessions
