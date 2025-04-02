@@ -62,10 +62,10 @@ Apps can be excluded from "unmapped" by assigning specific apps to a number equa
 This will allow you to control all unmapped apps with "unmapped" but exclude Chrome. Why you'd want this, I'm not sure, but it's probably useful in some edge cases.
 
 ## Usage
-Upon running the [executable](https://github.com/JRitmeester/WaVeS/releases/download/v1.0/WaVeSv1.0.exe), a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
+Upon running the executable, a tray icon will open. Clicking the icon will reload the mappings from `mappings.txt`, so that they can be changed as desired without having to close and restart the app.
 
 ## Customisation
-You are free to use the source code. The repository contains a `buid.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.
+You are free to use the source code. The repository contains a `build.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.
 
 ## Contributing
 In order to clone the project and set it up, you can run `poetry install` which should work for the most part. However PyQt5 is annoying and requires manual installation afterwards using `poetry run pip install pyqt5`.
