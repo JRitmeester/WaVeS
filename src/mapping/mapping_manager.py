@@ -23,20 +23,19 @@ class MappingManager(MappingManagerProtocol):
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, list[Session | Device]]:
 
-        target_indices = self.get_target_indices(config_manager)
-
         sliders = int(config_manager.get_setting("device.sliders"))
         session_dict = {i: [] for i in range(sliders)}
+        mappings = config_manager.get_setting("mappings")
 
         # Process each target mapping
-        for idx, targets in target_indices.items():
+        for idx, targets in mappings.items():
             for target in targets:
                 self._add_single_target_mapping(
                     target, idx, session_dict, session_manager
                 )
 
         # Handle unmapped sessions
-        for idx, targets in target_indices.items(): 
+        for idx, targets in mappings.items(): 
             if "unmapped" in targets:
                 self._add_unmapped_sessions(
                     idx,
@@ -46,22 +45,6 @@ class MappingManager(MappingManagerProtocol):
             )
 
         return session_dict
-
-    def get_target_indices(
-        self, config_manager: ConfigManagerProtocol
-    ) -> dict[int, str]:
-        mappings = config_manager.get_setting("mappings")
-        return mappings
-
-        # for idx in range(sliders):
-        #     application_str = mappings[idx]
-        #     if application_str:
-        #         if isinstance(application_str, str) and "," in application_str:
-        #             application_str = tuple(
-        #                 app.strip() for app in application_str.split(",")
-        #             )
-        #         target_indices[application_str] = int(idx)
-        # return target_indices
 
     def _add_single_target_mapping(
         self,

@@ -18,11 +18,6 @@ class MappingManagerProtocol(Protocol):
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, Session]: ...
 
-    def get_target_indices(
-        self,
-        config_manager: ConfigManagerProtocol,
-    ) -> dict[str, int]: ...
-
     def _add_single_target_mapping(
         self,
         target: str,
