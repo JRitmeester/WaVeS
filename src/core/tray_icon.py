@@ -1,6 +1,6 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QMessageBox, QDialog, QVBoxLayout, QTextEdit, QPushButton
 import utils.utils as utils
 from core.volume_thread import VolumeThread
 import webbrowser
@@ -16,6 +16,7 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         # Setup the error window
         self.err_box = None
+        self.info_dialog = None
 
         # Setup the context menu when you right click the tray icon.
         menu = QtWidgets.QMenu(parent)
@@ -23,8 +24,8 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         reload_ = menu.addAction("Reload mapping")
         reload_.triggered.connect(self.volume_thread.reload_mapping)
 
-        list_apps = menu.addAction("List Applications")
-        list_apps.triggered.connect(self.list_applications)
+        list_apps = menu.addAction("List sessions and devices")
+        list_apps.triggered.connect(self.list_sessions_and_devices)
 
         open_config = menu.addAction("Open configuration file")
         open_config.triggered.connect(
@@ -65,12 +66,35 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     def start_app(self):
         self.volume_thread.start()
 
-    def list_applications(self):
-        """Show a message box with all applications currently in the Windows Volume mixer"""
+    def list_sessions_and_devices(self):
+        """Show a dialog with all sessions and devices currently in the Windows Volume mixer"""
         software_sessions = self.volume_thread.session_manager.software_sessions
         devices = self.volume_thread.session_manager.devices
 
-        messagebox_text = "Applications:\n" + "\n".join(sorted(software_sessions.keys()))
+        messagebox_text = "Sessions:\n" + "\n".join(sorted(software_sessions.keys()))
         messagebox_text += "\n\nDevices:\n" + "\n".join(sorted(devices.keys()))
 
-        QMessageBox.information(None, "Applications", messagebox_text)
+        if self.info_dialog is None:
+            self.info_dialog = QDialog(QtWidgets.QApplication.activeWindow())
+            self.info_dialog.setWindowTitle("Sessions and Devices")
+            self.info_dialog.setMinimumWidth(400)
+            self.info_dialog.setMinimumHeight(300)
+            self.info_dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+            
+            layout = QVBoxLayout()
+            text_edit = QTextEdit()
+            text_edit.setReadOnly(True)
+            layout.addWidget(text_edit)
+            
+            close_button = QPushButton("Close")
+            close_button.clicked.connect(self.info_dialog.hide)
+            layout.addWidget(close_button)
+            
+            self.info_dialog.setLayout(layout)
+            self.info_dialog.text_edit = text_edit
+            
+            # Connect the close event to hide instead of close
+            self.info_dialog.closeEvent = lambda e: self.info_dialog.hide()
+
+        self.info_dialog.text_edit.setText(messagebox_text)
+        self.info_dialog.show()
