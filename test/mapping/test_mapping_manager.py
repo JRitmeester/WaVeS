@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import Mock
 from mapping.mapping_manager import MappingManager
 from sessions.sessions import (
-    SessionGroup,
     SoftwareSession,
     MasterSession,
     SystemSession,
@@ -64,7 +63,7 @@ class MockConfigManager(ConfigManagerProtocol):
             "mappings": [
                 "master",
                 "system",
-                "chrome.exe,brave.exe",
+                "chrome.exe",
                 "unmapped",
                 "spotify.exe",
             ],
@@ -104,11 +103,9 @@ def test_get_mapping(
     assert len(result) == 5  # Number of sliders
     assert result[0] == session_manager.master_session
     assert result[1] == session_manager.system_session
-    assert isinstance(result[2], SessionGroup)
     assert len(result[2].sessions) == 2
     assert result[2].sessions[0] == session_manager.software_sessions["chrome.exe"]
     assert result[2].sessions[1] == session_manager.software_sessions["brave.exe"]
-    assert isinstance(result[3], SessionGroup)
     assert len(result[3].sessions) == 1  # Only spotify should be unmapped
     assert result[4] == session_manager.software_sessions["spotify.exe"]
 
@@ -121,7 +118,6 @@ def test_get_target_indices(
     assert isinstance(result, dict)
     assert result["master"] == 0
     assert result["system"] == 1
-    assert isinstance(result[("chrome.exe", "brave.exe")], int)
     assert result[("chrome.exe", "brave.exe")] == 2
     assert result["unmapped"] == 3
     assert result["spotify.exe"] == 4
@@ -176,24 +172,6 @@ def test_add_software_session(
     assert 1 not in session_dict
 
 
-def test_add_group_mapping(
-    mapping_manager: MappingManagerProtocol, session_manager: SessionManagerProtocol
-):
-    session_dict = {}
-    target_group = ("chrome.exe", "brave.exe")
-
-    mapping_manager._add_group_mapping(target_group, 0, session_dict, session_manager)
-
-    assert isinstance(session_dict[0], SessionGroup)
-    assert len(session_dict[0].sessions) == 2
-    assert (
-        session_dict[0].sessions[0] == session_manager.software_sessions["chrome.exe"]
-    )
-    assert session_dict[0].sessions[1] == session_manager.software_sessions["brave.exe"]
-    assert session_manager.mapped_sessions["chrome.exe"] is True
-    assert session_manager.mapped_sessions["brave.exe"] is True
-
-
 def test_add_unmapped_sessions(
     mapping_manager: MappingManagerProtocol,
     session_manager: SessionManagerProtocol,
@@ -214,7 +192,6 @@ def test_add_unmapped_sessions(
         2, session_dict, session_manager, config_manager
     )
 
-    assert isinstance(session_dict[2], SessionGroup)
     assert len(session_dict[2].sessions) == 2  # spotify and system
     assert (
         session_dict[2].sessions[0] == session_manager.software_sessions["spotify.exe"]

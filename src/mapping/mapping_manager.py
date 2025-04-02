@@ -1,7 +1,7 @@
 from sessions.session_protocol import SessionManagerProtocol
 from config.config_protocol import ConfigManagerProtocol
 from mapping.mapping_protocol import MappingManagerProtocol
-from sessions.sessions import Session, SessionGroup, Device
+from sessions.sessions import Session, Device
 
 
 class MappingManager(MappingManagerProtocol):
@@ -34,8 +34,6 @@ class MappingManager(MappingManagerProtocol):
                 self._add_single_target_mapping(
                     target, idx, session_dict, session_manager
                 )
-            # elif isinstance(target, tuple):
-            #     self._add_group_mapping(target, idx, session_dict, session_manager)
 
         # Handle unmapped sessions
         for idx, targets in target_indices.items(): 
@@ -93,33 +91,6 @@ class MappingManager(MappingManagerProtocol):
         for session in session_manager.software_sessions:
             if target.lower() in session.name.lower():
                 session_dict[idx].append(session)
-                session_manager.mapped_sessions[session.unique_name] = True
-
-
-    def _add_group_mapping(
-        self,
-        target_group: tuple[str, ...],
-        idx: int,
-        session_dict: dict[int, Session],
-        session_manager: SessionManagerProtocol,
-    ) -> None:
-        active_sessions = []
-
-        for target_app in target_group:
-            target_app = target_app.lower()
-            if (
-                target_app.lower() in ["master", "system", "unmapped"]
-                or "device:" in target_app.lower()
-            ):
-                continue
-
-            session = session_manager.get_software_session_by_name(target_app)
-            if session is not None:
-                active_sessions.append(session)
-
-        if active_sessions:
-            session_dict[idx] = SessionGroup(sessions=active_sessions)
-            for session in active_sessions:
                 session_manager.mapped_sessions[session.unique_name] = True
 
     def _add_unmapped_sessions(

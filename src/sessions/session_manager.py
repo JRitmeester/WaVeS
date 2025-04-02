@@ -1,5 +1,4 @@
 from sessions.sessions import (
-    SessionGroup,
     MasterSession,
     Session,
     SystemSession,

@@ -61,26 +61,6 @@ class SoftwareSession(Session):
         return self.volume.GetMasterVolume()
 
 
-class SessionGroup:
-
-    def __init__(self, sessions: List[Session]):
-        self.sessions = sessions
-
-    def __repr__(self):
-        return f"SessionGroup(sessions={[session.unique_name for session in self.sessions]})"
-
-    def __contains__(self, item: AudioSession):
-        if type(item) == AudioSession:
-            return any([s.session == item for s in self.sessions])
-
-    def set_volume(self, value):
-        for session in self.sessions:
-            session.set_volume(value)
-
-    def get_volume(self):
-        return [session.get_volume() for session in self.sessions]
-
-
 class MasterSession(Session):
 
     def __init__(self):
