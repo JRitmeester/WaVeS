@@ -6,21 +6,25 @@
 # - Application names (e.g., 'spotify.exe'): Controls specific app volume (case insensitive)
 # - 'unmapped': Controls all unmapped running applications (excludes master channel)
 # - 'system': Controls system sound volume
-mappings:
-  0: master
-  1: system
-  2: chrome.exe
-  3: spotify.exe
-  4: unmapped
+  mappings:
+  0:
+    - master
+  1:
+    - system
+  2:
+    - discord.exe
+  3:
+    - brave.exe
+    - spotify.exe
+  4:
+    - unmapped
 
-# Device Configuration
 device:
   name: "Arduino Micro"
   port: "COM6"  # Only used if device name cannot be found automatically
   baudrate: 9600
   sliders: 5
 
-# Volume Control Settings
 settings:
   inverted: false  # When true: top=low volume, bottom=high volume
   system_in_unmapped: true  # Include system sounds in 'unmapped' if not explicitly assigned
