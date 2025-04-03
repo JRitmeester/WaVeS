@@ -46,6 +46,7 @@ class Session(ABC):
     def mark_as_mapped(self, value: bool):
         pass
 
+
 class SoftwareSession(Session):
 
     def __init__(self, session: AudioSession):
@@ -75,9 +76,10 @@ class SoftwareSession(Session):
 
     def get_volume(self):
         return self.volume.GetMasterVolume()
-    
+
     def mark_as_mapped(self, value: bool):
         self._is_mapped = value
+
 
 class MasterSession(Session):
 
@@ -94,11 +96,11 @@ class MasterSession(Session):
     @property
     def name(self) -> str:
         return "master"
-    
+
     @property
     def unique_name(self) -> str:
         return "master"
-    
+
     @property
     def is_mapped(self) -> bool:
         return self._is_mapped
@@ -133,7 +135,7 @@ class SystemSession(SoftwareSession):
     @property
     def name(self) -> str:
         return "system"
-    
+
     @property
     def unique_name(self) -> str:
         return "system"
@@ -153,11 +155,11 @@ class Device(AudioDevice, Session):
         self.pycaw_device = pycaw_device
         self.volume = self._get_volume_interface()
         self._is_mapped = False
+
     def _get_volume_interface(self):
         device_enumerator = comtypes.CoCreateInstance(
             CLSID_MMDeviceEnumerator, IMMDeviceEnumerator, comtypes.CLSCTX_INPROC_SERVER
         )
-
 
         speaker = (
             device_enumerator.GetDevice(self.pycaw_device.id)
@@ -166,7 +168,6 @@ class Device(AudioDevice, Session):
                 EDataFlow.eRender.value, ERole.eMultimedia.value
             )
         )
-
 
         if not speaker:
             raise RuntimeError(
@@ -187,11 +188,11 @@ class Device(AudioDevice, Session):
     @property
     def name(self) -> str:
         return self.pycaw_device.FriendlyName
-    
+
     @property
     def unique_name(self) -> str:
         return self.name
-    
+
     @property
     def is_mapped(self) -> bool:
         return self._is_mapped
@@ -201,6 +202,6 @@ class Device(AudioDevice, Session):
 
     def get_volume(self):
         return self.volume.GetMasterVolumeLevelScalar()
-    
+
     def mark_as_mapped(self, value: bool):
         self._is_mapped = value

@@ -33,4 +33,3 @@ class MappingManagerProtocol(Protocol):
         session_manager: SessionManagerProtocol,
         config_manager: ConfigManagerProtocol,
     ) -> None: ...
-

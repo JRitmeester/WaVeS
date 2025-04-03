@@ -32,16 +32,20 @@ class ConfigManager(ConfigManagerProtocol):
         Get the value of a setting from the config file using dot notation.
         Example: 'device.baudrate' will return the baudrate under the device section
         """
-        keys = path.split('.')
+        keys = path.split(".")
         value = self.config_data
         for key in keys:
             if isinstance(value, dict):
                 if key not in value:
-                    raise ValueError(f"Setting {path} is not found in the configuration file.")
+                    raise ValueError(
+                        f"Setting {path} is not found in the configuration file."
+                    )
                 value = value[key]
             else:
-                raise ValueError(f"Cannot access {key} in {path} as parent is not a dictionary")
-                
+                raise ValueError(
+                    f"Cannot access {key} in {path} as parent is not a dictionary"
+                )
+
         if value is None:
             raise ValueError(f"Setting {path} is present but empty.")
         return value
@@ -63,7 +67,9 @@ class ConfigManager(ConfigManagerProtocol):
         try:
             return self.get_setting("device.port")
         except ValueError:
-            raise ValueError("The config file does not contain the right device name or an appropriate port.")
+            raise ValueError(
+                "The config file does not contain the right device name or an appropriate port."
+            )
 
     @staticmethod
     def get_default_config_path() -> Path:
