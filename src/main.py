@@ -11,7 +11,7 @@ from sessions.session_manager import SessionManager
 from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
 from microcontroller.microcontroller_manager import MicrocontrollerManager
-
+import textwrap
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
@@ -57,10 +57,15 @@ def main():
         QMessageBox.information(
             None,
             "New config file created",
-            f"""It seems this is the first time you started WaVeS. 
-            A new configuration file was created and will be opened for you to view the settings:
-            You can find it at {config_path.as_posix()} or by right-clicking the tray icon.
-            """,
+            textwrap.dedent(
+                f"""
+                It seems this is the first time you started WaVeS.
+
+                A new configuration file was created and will be opened for you to view the settings:
+                You can find it by right-clicking the tray icon, or at:
+                {config_path.as_posix()}
+                """
+            ),
         )
         webbrowser.open(config_path)
 
