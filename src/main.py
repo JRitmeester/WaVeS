@@ -61,7 +61,8 @@ def main():
                 f"""
                 It seems this is the first time you started WaVeS.
 
-                A new configuration file was created and will be opened for you to view the settings:
+                A new configuration file was created and will be opened for you to view the settings.
+                
                 You can find it by right-clicking the tray icon, or at:
                 {config_path.as_posix()}
                 """
