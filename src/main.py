@@ -57,11 +57,10 @@ def main():
         QMessageBox.information(
             None,
             "New config file created",
-            f"""A new config file was created for you in the same directory as the app:
-            
-            {config_path.as_posix()}
-            
-            It will now be opened for you to view the settings.""",
+            f"""It seems this is the first time you started WaVeS. 
+            A new configuration file was created and will be opened for you to view the settings:
+            You can find it at {config_path.as_posix()} or by right-clicking the tray icon.
+            """,
         )
         webbrowser.open(config_path)
 
