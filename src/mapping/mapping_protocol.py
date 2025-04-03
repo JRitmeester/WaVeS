@@ -26,15 +26,6 @@ class MappingManagerProtocol(Protocol):
         session_manager: SessionManagerProtocol,
     ) -> None: ...
 
-    def _add_software_session(
-        self,
-        target: str,    
-        idx: int,
-        session_dict: dict[int, Session],
-        session_manager: SessionManagerProtocol,
-    ) -> None: ...
-
-
     def _add_unmapped_sessions(
         self,
         idx: int,
