@@ -131,6 +131,7 @@ class SystemSession(SoftwareSession):
             raise RuntimeError("System sounds session could not be found.")
         self.session = system_pycaw_session
         self.volume = self.session.SimpleAudioVolume
+        self._is_mapped = False
 
     @property
     def name(self) -> str:
@@ -139,6 +140,10 @@ class SystemSession(SoftwareSession):
     @property
     def unique_name(self) -> str:
         return "system"
+
+    @property
+    def is_mapped(self) -> bool:
+        return self._is_mapped
 
 
 class Device(AudioDevice, Session):
