@@ -5,7 +5,6 @@ from sessions.sessions import Session
 class SessionManagerProtocol(Protocol):
 
     software_sessions: dict[str, Session]
-    mapped_sessions: dict[str, bool]
     devices: dict[str, Session]
 
     @property
