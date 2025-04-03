@@ -6,7 +6,7 @@
 # - Application names (e.g., 'spotify.exe'): Controls specific app volume (case insensitive)
 # - 'unmapped': Controls all unmapped running applications (excludes master channel)
 # - 'system': Controls system sound volume
-  mappings:
+mappings:
   0:
     - master
   1:
