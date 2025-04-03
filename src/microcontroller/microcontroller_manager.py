@@ -14,8 +14,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         except serial.SerialException as e:
             self._connected = False
             raise ConnectionError(
-                "The serial connection is busy. This may mean that another instance "
-                "is already running. Please check the system tray or the task manager."
+                f"The serial connection is busy or unavailable. This may mean that the wrong COM port is specified ({port}) or that another instance of WaVeS is already running."
             ) from e
 
     def read_values(self, expected_count: int) -> list[float] | None:
