@@ -29,20 +29,22 @@ class MappingManager(MappingManagerProtocol):
 
         # Process each target mapping
         for idx, targets in mappings.items():
+            idx_int = int(idx)  # Convert string key to integer
             for target in targets:
                 self._add_single_target_mapping(
-                    target, idx, session_dict, session_manager
+                    target, idx_int, session_dict, session_manager
                 )
 
         # Handle unmapped sessions
-        for idx, targets in mappings.items(): 
+        for idx, targets in mappings.items():
+            idx_int = int(idx)  # Convert string key to integer
             if "unmapped" in targets:
                 self._add_unmapped_sessions(
-                    idx,
+                    idx_int,
                     session_dict,
                     session_manager,
                     config_manager,
-            )
+                )
 
         return session_dict
 
@@ -55,26 +57,18 @@ class MappingManager(MappingManagerProtocol):
     ) -> None:
         if target == "master":
             session_dict[idx].append(session_manager.master_session)
-            session_manager.mapped_sessions["master"] = True
+            session_manager.master_session.mark_as_mapped(True)
         elif target == "system":
             session_dict[idx].append(session_manager.system_session)
-            session_manager.mapped_sessions["system"] = True
+            session_manager.system_session.mark_as_mapped(True)
         elif target.startswith("device:"):
             session_dict[idx].append(session_manager.get_device_session(target[7:]))
         elif target != "unmapped":
-            self._add_software_session(target, idx, session_dict, session_manager)
-
-    def _add_software_session(
-        self,
-        target: str,
-        idx: int,
-        session_dict: dict[int, Session],
-        session_manager: SessionManagerProtocol,
-    ) -> None:
-        for session in session_manager.software_sessions:
-            if target.lower() in session.name.lower():
-                session_dict[idx].append(session)
-                session_manager.mapped_sessions[session.unique_name] = True
+            # Find the software session that matches the target, and add it to the session_dict
+            for session in session_manager.software_sessions:
+                if target.lower() in session.name.lower():
+                    session_dict[idx].append(session)
+                    session.mark_as_mapped(True)
 
     def _add_unmapped_sessions(
         self,
@@ -86,15 +80,15 @@ class MappingManager(MappingManagerProtocol):
         unmapped_sessions = [
             session
             for session in session_manager.software_sessions
-            if not session_manager.mapped_sessions[session.unique_name]
+            if not session.is_mapped
         ]
 
         if (
             config_manager.get_setting("settings.system_in_unmapped")
-            and not session_manager.mapped_sessions["system"]
+            and not session_manager.system_session.is_mapped
         ):
             unmapped_sessions.append(session_manager.system_session)
 
         session_dict[idx].extend(unmapped_sessions)
         for session in unmapped_sessions:
-            session_manager.mapped_sessions[session.unique_name] = True
+            session.mark_as_mapped(True)

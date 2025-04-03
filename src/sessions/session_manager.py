@@ -19,10 +19,6 @@ class SessionManager(SessionManagerProtocol):
         self._master_session: MasterSession = MasterSession()
         self._system_session: SystemSession = SystemSession()
         self.devices: dict[str, Device] = {}
-        self.mapped_sessions: dict[str, bool] = {
-            "master": False,
-            "system": False,
-        }
         self._last_session_ids: Set[str] = set()
         self._last_device_ids: Set[str] = set()
         self.reload_sessions_and_devices()
@@ -89,8 +85,6 @@ class SessionManager(SessionManagerProtocol):
             session = SoftwareSession(pycaw_session)
             # Use unique_name (with PID) for software_sessions dictionary
             self.software_sessions.append(session)
-            # Use process name (without PID) for mapped_sessions dictionary
-            self.mapped_sessions[session.unique_name] = False
 
     def get_software_session_by_name(self, session_name: str) -> Session:
         return next((s for s in self.software_sessions if s.name == session_name), None)
@@ -123,7 +117,6 @@ class SessionManager(SessionManagerProtocol):
             ):
                 continue
             device = Device(pycaw_device)
-            self.mapped_sessions[device.name] = False
             self.devices[device.name] = device
 
 

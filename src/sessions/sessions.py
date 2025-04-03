@@ -1,6 +1,4 @@
 from ctypes import cast, POINTER
-from typing import List
-
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, AudioSession, AudioDevice
 from abc import ABC, abstractmethod
@@ -26,6 +24,16 @@ class Session(ABC):
     def name(self):
         pass
 
+    @property
+    @abstractmethod
+    def unique_name(self):
+        pass
+
+    @property
+    @abstractmethod
+    def is_mapped(self):
+        pass
+
     @abstractmethod
     def set_volume(self, value):
         pass
@@ -34,12 +42,16 @@ class Session(ABC):
     def get_volume(self):
         pass
 
+    @abstractmethod
+    def mark_as_mapped(self, value: bool):
+        pass
 
 class SoftwareSession(Session):
 
     def __init__(self, session: AudioSession):
         self.session = session
         self.volume = self.session.SimpleAudioVolume
+        self._is_mapped = False
 
     @property
     def name(self) -> str:
@@ -51,6 +63,10 @@ class SoftwareSession(Session):
         """The display name including PID, used for UI purposes"""
         return self.session.Process.name() + f" ({self.session.Process.pid})"
 
+    @property
+    def is_mapped(self) -> bool:
+        return self._is_mapped
+
     def __repr__(self):
         return f"Session(unique_name={self.unique_name})"
 
@@ -59,7 +75,9 @@ class SoftwareSession(Session):
 
     def get_volume(self):
         return self.volume.GetMasterVolume()
-
+    
+    def mark_as_mapped(self, value: bool):
+        self._is_mapped = value
 
 class MasterSession(Session):
 
@@ -71,6 +89,19 @@ class MasterSession(Session):
             ),
             POINTER(IAudioEndpointVolume),
         )
+        self._is_mapped = False
+
+    @property
+    def name(self) -> str:
+        return "master"
+    
+    @property
+    def unique_name(self) -> str:
+        return "master"
+    
+    @property
+    def is_mapped(self) -> bool:
+        return self._is_mapped
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
@@ -78,9 +109,8 @@ class MasterSession(Session):
     def get_volume(self):
         return self.volume.GetMasterVolumeLevelScalar()
 
-    @property
-    def name(self) -> str:
-        return "master"
+    def mark_as_mapped(self, value: bool):
+        self._is_mapped = value
 
 
 class SystemSession(SoftwareSession):
@@ -108,15 +138,6 @@ class SystemSession(SoftwareSession):
     def unique_name(self) -> str:
         return "system"
 
-    def set_volume(self, value):
-        super().set_volume(value)
-
-    def get_volume(self):
-        return super().get_volume()
-
-    def __repr__(self):
-        return self.unique_name
-
 
 class Device(AudioDevice, Session):
 
@@ -131,7 +152,7 @@ class Device(AudioDevice, Session):
         )
         self.pycaw_device = pycaw_device
         self.volume = self._get_volume_interface()
-
+        self._is_mapped = False
     def _get_volume_interface(self):
         device_enumerator = comtypes.CoCreateInstance(
             CLSID_MMDeviceEnumerator, IMMDeviceEnumerator, comtypes.CLSCTX_INPROC_SERVER
@@ -166,9 +187,20 @@ class Device(AudioDevice, Session):
     @property
     def name(self) -> str:
         return self.pycaw_device.FriendlyName
+    
+    @property
+    def unique_name(self) -> str:
+        return self.name
+    
+    @property
+    def is_mapped(self) -> bool:
+        return self._is_mapped
 
     def set_volume(self, value):
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
 
     def get_volume(self):
         return self.volume.GetMasterVolumeLevelScalar()
+    
+    def mark_as_mapped(self, value: bool):
+        self._is_mapped = value
