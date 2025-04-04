@@ -12,6 +12,7 @@ from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
 from microcontroller.microcontroller_manager import MicrocontrollerManager
 import textwrap
+from ui.mapping_dialog import MappingDialog
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
@@ -89,6 +90,13 @@ def main():
         widget,
         volume_thread,
     )
+
+    mapping_dialog = MappingDialog(
+        session_manager=session_manager,
+        mapping_manager=mapping_manager,
+        config_manager=config_manager,
+    )
+    mapping_dialog.show()
 
     sys.exit(app.exec_())
 
