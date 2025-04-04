@@ -3,8 +3,31 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QLabel, QTextEdit,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 import utils.utils as utils
+import sys
+import traceback
 
 class ErrorDialog(QDialog):
+
+    @staticmethod
+    def _exception_hook(exctype, value, tb):
+        """Global exception handler that shows errors in an ErrorDialog"""
+        # Get the full traceback as a string
+        traceback_str = ''.join(traceback.format_exception(exctype, value, tb))
+        
+        # Create and show the error dialog
+        ErrorDialog(
+            str(exctype.__name__),
+            str(value),
+            traceback_str
+        )
+        
+        # Also print to console for debugging
+        print(''.join(traceback.format_exception(exctype, value, tb)), file=sys.stderr)
+
+    @classmethod
+    def setup_exception_handling(cls):
+        """Set up global exception handling to show errors in ErrorDialog"""
+        sys.excepthook = cls._exception_hook
 
     def __init__(self, error_title: str, error_message: str | None = None, stacktrace: str | None = None, parent=None):
         super().__init__(parent)
