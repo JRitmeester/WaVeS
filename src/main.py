@@ -72,11 +72,12 @@ def main():
 
     session_manager = SessionManager()
     mapping_manager = MappingManager()
+    microcontroller_manager = MicrocontrollerManager()
     volume_thread = VolumeThread(
         config_manager=config_manager,
         session_manager=session_manager,
         mapping_manager=mapping_manager,
-        microcontroller_manager=MicrocontrollerManager(),
+        microcontroller_manager=microcontroller_manager,
     )
     # Create a widet to persist the tray icon. Not assigning it to a variable won't crash the app,
     # but it won't show the icon in the system tray.
