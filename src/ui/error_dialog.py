@@ -36,12 +36,15 @@ class ErrorDialog(QDialog):
         self.setWindowTitle("WaVeS encountered an error")
         self.setWindowIcon(QIcon(utils.get_icon_path().as_posix()))
         self.setModal(True)  # Make dialog modal
+        self.resize(500, 300)  # Set a default size
         
         # Create main layout
         main_layout = QVBoxLayout(self)
+        main_layout.setSpacing(10)  # Add consistent spacing between elements
         
         # Create error message layout
         message_layout = QHBoxLayout()
+        message_layout.setSpacing(10)
         
         # Add error icon
         icon_label = QLabel()
@@ -50,6 +53,7 @@ class ErrorDialog(QDialog):
         
         # Add error messages
         message_container = QVBoxLayout()
+        message_container.setSpacing(5)
         title_label = QLabel(error_title)
         title_label.setStyleSheet("font-weight: bold;")
         message_container.addWidget(title_label)
@@ -60,18 +64,16 @@ class ErrorDialog(QDialog):
             message_container.addWidget(detail_label)
             
         message_layout.addLayout(message_container, 1)
-        main_layout.addLayout(message_layout)
+        main_layout.addLayout(message_layout, 0)  # 0 means no stretch
 
         # Add stacktrace if provided
         if stacktrace:
             text_edit = QTextEdit()
             text_edit.setPlainText(stacktrace)
             text_edit.setReadOnly(True)
-            text_edit.setFixedHeight(80)
             text_edit.setMinimumWidth(400)
             text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            main_layout.addSpacing(10)
-            main_layout.addWidget(text_edit)
+            main_layout.addWidget(text_edit, 1)  # 1 means stretch factor, will expand to fill space
 
         # Add OK button in its own layout
         button_layout = QHBoxLayout()
@@ -79,6 +81,6 @@ class ErrorDialog(QDialog):
         ok_button.clicked.connect(self.accept)
         button_layout.addStretch()
         button_layout.addWidget(ok_button)
-        main_layout.addLayout(button_layout)
+        main_layout.addLayout(button_layout, 0)  # 0 means no stretch
         
         self.exec_()
