@@ -40,6 +40,8 @@ def main():
 
     # Set up the application before the timer, because it requires a QThread instance.
     app = QtWidgets.QApplication(sys.argv)
+    
+    sys.excepthook = ErrorDialog._exception_hook
 
     # Enable processing of keyboard interrupts in the Qt event loop
     timer = QtCore.QTimer()
