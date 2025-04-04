@@ -12,6 +12,7 @@ from mapping.mapping_manager import MappingManager
 from core.volume_thread import VolumeThread
 from microcontroller.microcontroller_manager import MicrocontrollerManager
 import textwrap
+from ui.error_dialog import ErrorDialog
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
