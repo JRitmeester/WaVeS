@@ -2,6 +2,9 @@ from pathlib import Path
 import yaml
 from serial.tools import list_ports
 from .config_protocol import ConfigManagerProtocol
+from .config_validator import ConfigValidator
+from pydantic import ValidationError
+from .config_exceptions import ConfigValidationError
 
 
 class ConfigManager(ConfigManagerProtocol):
@@ -10,6 +13,7 @@ class ConfigManager(ConfigManagerProtocol):
         self.config_file_path = config_path / "mapping.yml"
         self.default_mapping_path = default_mapping_path
         self.config_data = {}
+        self.validator = ConfigValidator(self.config_file_path)
 
     def ensure_config_exists(self) -> Path:
         """
@@ -22,10 +26,14 @@ class ConfigManager(ConfigManagerProtocol):
 
     def load_config(self) -> None:
         """
-        Load the YAML config file and store the data.
+        Load and validate the YAML config file.
+        Raises ConfigValidationError if the configuration is invalid.
         """
-        with open(self.config_file_path) as f:
-            self.config_data = yaml.safe_load(f)
+        try:
+            validated_config = self.validator.validate()
+            self.config_data = validated_config.model_dump()
+        except ValidationError as e:
+            raise ConfigValidationError(e)
 
     def get_setting(self, path: str) -> str:
         """
