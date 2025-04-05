@@ -1,6 +1,5 @@
 import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMessageBox, QDialog, QVBoxLayout, QTextEdit, QPushButton
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon
 import utils.utils as utils
 from core.volume_thread import VolumeThread
@@ -43,20 +42,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
 
         # When the tray icon is clicked, reload the mapping.
         self.activated.connect(self.on_click)
-
-    def std_err_post(self, msg):
-        if self.err_box is None:
-            self.err_box = QMessageBox()
-            # Both OK and window delete fire the 'finished' signal
-            self.err_box.finished.connect(lambda: self.err_box.setText(""))
-
-        self.err_box.setWindowTitle("Runtime Error")
-        self.err_box.setIcon(QMessageBox.Critical)
-        self.err_box.setText(self.err_box.text() + msg)
-
-        # .show() is used here because .exec() or .exec_() create multiple
-        # MessageBoxes.
-        self.err_box.show()
 
     def on_click(self, reason):
         if reason == self.Trigger:  # LMB
