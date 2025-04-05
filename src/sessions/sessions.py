@@ -115,7 +115,7 @@ class MasterSession(Session):
         self._is_mapped = value
 
 
-class SystemSession(SoftwareSession):
+class SystemSession(Session):
 
     def __init__(self):
         available_pycaw_sessions = AudioUtilities.GetAllSessions()
@@ -144,6 +144,15 @@ class SystemSession(SoftwareSession):
     @property
     def is_mapped(self) -> bool:
         return self._is_mapped
+
+    def set_volume(self, value):
+        self.volume.SetMasterVolume(value, None)
+
+    def get_volume(self):
+        return self.volume.GetMasterVolume()
+
+    def mark_as_mapped(self, value: bool):
+        self._is_mapped = value
 
 
 class Device(AudioDevice, Session):
