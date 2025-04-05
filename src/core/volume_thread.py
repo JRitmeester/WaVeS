@@ -1,7 +1,4 @@
-import sys
-import serial
 from PyQt5.QtCore import QThread, QTimer
-from PyQt5.QtWidgets import QMessageBox
 from sessions.session_manager import SessionManagerProtocol
 from config.config_manager import ConfigManagerProtocol
 from mapping.mapping_manager import MappingManagerProtocol
