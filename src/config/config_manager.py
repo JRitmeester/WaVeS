@@ -24,7 +24,7 @@ class ConfigManager(ConfigManagerProtocol):
             self.config_file_path.touch(exist_ok=True)
             self.config_file_path.write_text(self.default_mapping_path.read_text())
 
-    def load_config(self) -> None:
+    def load_config(self ) -> None:
         """
         Load and validate the YAML config file.
         Raises ConfigValidationError if the configuration is invalid.
