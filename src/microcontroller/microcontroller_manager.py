@@ -23,7 +23,11 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             return None
 
         # Data is formatted as "<val>|<val>|<val>|<val>|<val>"
-        data = str(self.serial.readline()[:-2], "utf-8")  # Trim off '\r\n'.
+        # Creating a QMessageBox can disrupt the data flow and cause UnicodeDecodeError.
+        try:
+            data = str(self.serial.readline()[:-2], "utf-8")  # Trim off '\r\n'.
+        except UnicodeDecodeError:
+            return None
         if not data:
             return None
 
