@@ -12,6 +12,7 @@ import utils.utils as utils
 from utils.logger import logger
 import sys
 import traceback
+from config.config_exceptions import ConfigValidationError
 
 
 class ErrorDialog(QDialog):
@@ -26,8 +27,11 @@ class ErrorDialog(QDialog):
         logger.error(f"Unhandled exception: {str(value)}")
         logger.debug(f"Full traceback:\n{traceback_str}")
 
-        # Create and show the error dialog
-        ErrorDialog(str(exctype.__name__), str(value), traceback_str)
+        # For ConfigValidationError, don't show stacktrace
+        if isinstance(value, ConfigValidationError):
+            ErrorDialog(str(exctype.__name__), str(value))
+        else:
+            ErrorDialog(str(exctype.__name__), str(value), traceback_str)
 
     @classmethod
     def setup_exception_handling(cls):
@@ -47,7 +51,7 @@ class ErrorDialog(QDialog):
         self.setWindowTitle("WaVeS encountered an error")
         self.setWindowIcon(QIcon(utils.get_icon_path().as_posix()))
         self.setModal(True)  # Make dialog modal
-        self.resize(500, 300)  # Set a default size
+        # self.resize(500, 300)  # Set a default size
 
         # Create main layout
         main_layout = QVBoxLayout(self)
@@ -79,8 +83,8 @@ class ErrorDialog(QDialog):
         message_layout.addLayout(message_container, 1)
         main_layout.addLayout(message_layout, 0)  # 0 means no stretch
 
-        # Add stacktrace if provided
-        if stacktrace:
+        # Add stacktrace if provided and not a ConfigValidationError
+        if stacktrace and not isinstance(error_message, ConfigValidationError):
             text_edit = QTextEdit()
             text_edit.setPlainText(stacktrace)
             text_edit.setReadOnly(True)
