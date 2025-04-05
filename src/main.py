@@ -13,6 +13,7 @@ from core.volume_thread import VolumeThread
 from microcontroller.microcontroller_manager import MicrocontrollerManager
 import textwrap
 from ui.error_dialog import ErrorDialog
+from ui.welcome_dialog import WelcomeDialog
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
@@ -57,20 +58,8 @@ def main():
         config_manager.load_config()
     except FileNotFoundError:
         config_manager.ensure_config_exists()
-        QMessageBox.information(
-            None,
-            "New config file created",
-            textwrap.dedent(
-                f"""
-                It seems this is the first time you started WaVeS.
-
-                A new configuration file was created and will be opened for you to view the settings.
-                
-                You can find it by right-clicking the tray icon, or at:
-                {config_path.as_posix()}
-                """
-            ),
-        )
+        welcome_dialog = WelcomeDialog(config_path)
+        
         webbrowser.open(config_path)
 
     session_manager = SessionManager()
