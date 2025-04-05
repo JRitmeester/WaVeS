@@ -25,9 +25,10 @@ def setup_logging() -> logging.Logger:
     )
     
     # Create and configure file handler with rotation
-    log_file = log_dir / f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"
+    log_file = log_dir / "waves.log"
     file_handler = logging.handlers.RotatingFileHandler(
         log_file,
+        maxBytes=1024*1024,  # 1MB
         backupCount=5,
         encoding='utf-8'
     )
