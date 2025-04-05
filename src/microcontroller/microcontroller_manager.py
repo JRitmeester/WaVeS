@@ -15,6 +15,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             raise ConnectionError(
                 f"The serial connection is busy or unavailable. This may mean that the wrong COM port is specified ({port}) or that another instance of WaVeS is already running."
             ) from e
+        logger.info(f"Connected to {port} at {baudrate} baud")
 
     def read_values(self, expected_count: int) -> list[float] | None:
         """Read values from the microcontroller and validate them"""
@@ -46,6 +47,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         if self.serial:
             self.serial.close()
             self._connected = False
+            logger.info("Disconnected from microcontroller")
 
     @property
     def is_connected(self) -> bool:

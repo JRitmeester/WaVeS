@@ -2,7 +2,7 @@ from sessions.session_protocol import SessionManagerProtocol
 from config.config_protocol import ConfigManagerProtocol
 from mapping.mapping_protocol import MappingManagerProtocol
 from sessions.sessions import Session, Device
-
+from utils.logger import logger
 
 class MappingManager(MappingManagerProtocol):
     def __init__(self):
@@ -14,6 +14,7 @@ class MappingManager(MappingManagerProtocol):
         config_manager: ConfigManagerProtocol,
     ) -> dict[int, Session]:
 
+        logger.info("Creating mappings...")
         config_manager.load_config()
         return self.create_mappings(session_manager, config_manager)
 

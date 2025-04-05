@@ -8,8 +8,7 @@ from sessions.sessions import (
 from pycaw.pycaw import AudioUtilities
 from pycaw.constants import AudioDeviceState
 from sessions.session_protocol import SessionManagerProtocol
-from typing import Set
-
+from utils.logger import logger
 
 class SessionManager(SessionManagerProtocol):
 
@@ -20,8 +19,8 @@ class SessionManager(SessionManagerProtocol):
         self._master_session: MasterSession = MasterSession()
         self._system_session: SystemSession = SystemSession()
         self.devices: dict[str, Device] = {}
-        self._last_session_ids: Set[str] = set()
-        self._last_device_ids: Set[str] = set()
+        self._last_session_ids: set[str] = set()
+        self._last_device_ids: set[str] = set()
         self.reload_sessions_and_devices()
 
     @property
@@ -32,7 +31,7 @@ class SessionManager(SessionManagerProtocol):
     def master_session(self) -> MasterSession:
         return self._master_session
 
-    def _get_session_ids(self) -> Set[str]:
+    def _get_session_ids(self) -> set[str]:
         """Get a set of unique identifiers for all current sessions"""
         return {
             session.Process.pid
@@ -40,7 +39,7 @@ class SessionManager(SessionManagerProtocol):
             if session.Process is not None
         }
 
-    def _get_device_ids(self) -> Set[str]:
+    def _get_device_ids(self) -> set[str]:
         """Get a set of unique identifiers for all current devices"""
         return {
             device.id
@@ -100,6 +99,7 @@ class SessionManager(SessionManagerProtocol):
             session = SoftwareSession(pycaw_session)
             # Use unique_name (with PID) for software_sessions dictionary
             self.software_sessions.append(session)
+            logger.info(f"Created software session: {session.name}")
 
     def get_software_session_by_name(self, session_name: str) -> Session:
         return next((s for s in self.software_sessions if s.name == session_name), None)
@@ -134,6 +134,7 @@ class SessionManager(SessionManagerProtocol):
                 continue
             device = Device(pycaw_device)
             self.devices[device.name] = device
+            logger.info(f"Created device session: {device.name}")
 
     def apply_volumes(
         self, values: list[float], mapping: dict[int, Session], inverted: bool
