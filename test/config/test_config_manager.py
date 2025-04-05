@@ -2,6 +2,9 @@ import pytest
 from unittest.mock import patch
 import yaml
 from config.config_manager import ConfigManager
+from pathlib import Path
+from config.config_exceptions import ConfigValidationError, ConfigFileEmptyError
+
 
 
 @pytest.fixture
@@ -61,9 +64,9 @@ def test_ensure_config_exists__does_not_exist(config_manager: ConfigManager):
 def test_load_config__successful_load(config_manager: ConfigManager):
     # Arrange: Set up a config file with known content
     test_content = {
-        "mappings": {"0": "master", "1": "system"},
-        "device": {"name": "Test Device", "baudrate": 9600},
-        "settings": {"inverted": False},
+        "mappings": {0:  ["master"], 1: ["system"]},
+        "device": {"name": "Test Device", "port": "COM1", "baudrate": 9600, "sliders": 2},
+        "settings": {"inverted": False, "system_in_unmapped": True, "session_reload_interval": 10},
     }
     config_manager.config_file_path.parent.mkdir(parents=True, exist_ok=True)
     config_manager.config_file_path.write_text(yaml.dump(test_content))
@@ -90,11 +93,9 @@ def test_load_config__empty_file(config_manager: ConfigManager):
     config_manager.config_file_path.parent.mkdir(parents=True, exist_ok=True)
     config_manager.config_file_path.write_text("")
 
-    # Act
-    config_manager.load_config()
-
-    # Assert: Should be an empty dict
-    assert config_manager.config_data == None
+    # Act & Assert
+    with pytest.raises(ConfigFileEmptyError):
+        config_manager.load_config()
 
 
 def test_get_setting__successful_retrieval(config_manager: ConfigManager):
@@ -228,3 +229,91 @@ def test_get_serial_port__empty_ports_list(config_manager: ConfigManager):
     # Mock empty ports list
     with patch("serial.tools.list_ports.comports", return_value=[]):
         assert config_manager.get_serial_port() == "COM6"
+
+
+def test_get_default_config_path():
+    """Test that the default config path is correctly constructed."""
+    expected_path = Path.home() / "AppData/Roaming"
+    assert ConfigManager.get_default_config_path() == expected_path
+
+
+def test_load_config__invalid_schema(config_manager: ConfigManager):
+    """Test loading config with invalid schema raises ConfigValidationError."""
+    # Create invalid config (missing required fields)
+    invalid_content = {
+        "mappings": {"0": ["master"]},
+        "device": {"name": "Test Device"},  # Missing required fields
+        "settings": {"inverted": False}  # Missing required fields
+    }
+    config_manager.config_file_path.parent.mkdir(parents=True, exist_ok=True)
+    config_manager.config_file_path.write_text(yaml.dump(invalid_content))
+
+    # Act & Assert
+    with pytest.raises(ConfigValidationError):
+        config_manager.load_config()
+
+
+def test_get_setting__invalid_path_format(config_manager: ConfigManager):
+    """Test that invalid path formats raise appropriate errors."""
+    config_manager.config_data = {"device": {"name": "Test Device"}}
+    
+    # Test empty path
+    with pytest.raises(ValueError):
+        config_manager.get_setting("")
+    
+    # Test path with leading/trailing dots
+    with pytest.raises(ValueError):
+        config_manager.get_setting(".device.name")
+    with pytest.raises(ValueError):
+        config_manager.get_setting("device.name.")
+
+
+def test_get_setting__non_string_path(config_manager: ConfigManager):
+    """Test that non-string paths raise TypeError."""
+    config_manager.config_data = {"device": {"name": "Test Device"}}
+    
+    with pytest.raises(AttributeError):
+        config_manager.get_setting(None)
+    with pytest.raises(AttributeError):
+        config_manager.get_setting(123)
+
+
+def test_get_serial_port__invalid_port_format(config_manager: ConfigManager):
+    """Test that invalid port formats are handled appropriately."""
+    # Setup config with invalid port format
+    config_manager.config_data = {
+        "device": {
+            "name": "Nonexistent Device",
+            "port": "INVALID_PORT"
+        }
+    }
+
+    # Mock empty ports list
+    with patch("serial.tools.list_ports.comports", return_value=[]):
+        # Should still return the port even if it's invalid format
+        assert config_manager.get_serial_port() == "INVALID_PORT"
+
+
+def test_get_serial_port__multiple_ports_same_device(config_manager: ConfigManager):
+    """Test behavior when multiple ports have the same device name."""
+    # Setup config with device name
+    config_manager.config_data = {"device": {"name": "Test Device"}}
+
+    # Mock multiple ports with same device name
+    mock_ports = [
+        ("COM1", "Test Device", "hwid1"),
+        ("COM2", "Test Device", "hwid2"),
+        ("COM3", "Other Device", "hwid3"),
+    ]
+
+    with patch("serial.tools.list_ports.comports", return_value=mock_ports):
+        # Should return the first matching port
+        assert config_manager.get_serial_port() == "COM1"
+
+
+def test_ensure_config_exists__permission_error(config_manager: ConfigManager):
+    """Test handling of permission errors when creating config."""
+    # Mock Path.mkdir to raise PermissionError
+    with patch.object(Path, 'mkdir', side_effect=PermissionError("Access denied")):
+        with pytest.raises(PermissionError):
+            config_manager.ensure_config_exists()
