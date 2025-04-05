@@ -1,7 +1,6 @@
 import serial
 from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
-
-
+from utils.logger import logger
 class MicrocontrollerManager(MicrocontrollerProtocol):
     def __init__(self) -> None:
         self.serial = None
@@ -16,6 +15,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             raise ConnectionError(
                 f"The serial connection is busy or unavailable. This may mean that the wrong COM port is specified ({port}) or that another instance of WaVeS is already running."
             ) from e
+        logger.info(f"Connected to {port} at {baudrate} baud")
 
     def read_values(self, expected_count: int) -> list[float] | None:
         """Read values from the microcontroller and validate them"""
@@ -34,7 +34,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         try:
             values = [float(val) for val in data.split("|")]
         except ValueError:
-            print(f"Invalid data: {data}")
+            logger.warning(f"Invalid data: {data}")
             return None
 
         if len(values) != expected_count:
@@ -47,6 +47,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         if self.serial:
             self.serial.close()
             self._connected = False
+            logger.info("Disconnected from microcontroller")
 
     @property
     def is_connected(self) -> bool:

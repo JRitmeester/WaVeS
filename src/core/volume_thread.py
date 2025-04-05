@@ -3,7 +3,7 @@ from sessions.session_manager import SessionManagerProtocol
 from config.config_manager import ConfigManagerProtocol
 from mapping.mapping_manager import MappingManagerProtocol
 from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
-
+from utils.logger import logger
 
 class VolumeThread(QThread):
 
@@ -50,11 +50,14 @@ class VolumeThread(QThread):
 
     def reload_mapping(self):
         """Reload the mapping when sessions change"""
+        logger.info("Reloading mapping...")
         self.mapping = self.mapping_manager.get_mapping(
             self.session_manager, self.config_manager
         )
+        logger.info("Mapping reloaded successfully")
 
     def run(self):
+        logger.info("Entering volume thread event loop...")
         sliders = int(self.config_manager.get_setting("device.sliders"))
         while self.running:
             values = self.microcontroller_manager.read_values(sliders)
@@ -67,6 +70,8 @@ class VolumeThread(QThread):
 
     def stop(self):
         """Stop the thread and clean up resources"""
+        logger.info("Stopping volume thread...")
         self.running = False
         self._check_timer.stop()
         self.microcontroller_manager.close()
+        logger.info("Volume thread stopped successfully")
