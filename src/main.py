@@ -4,6 +4,7 @@ import webbrowser
 import signal
 from PyQt5 import QtWidgets, QtGui, QtCore
 import utils.utils as utils
+from utils.logger import logger
 from core.tray_icon import SystemTrayIcon
 from config.config_manager import ConfigManager
 from sessions.session_manager import SessionManager
@@ -15,7 +16,7 @@ from ui.welcome_dialog import WelcomeDialog
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
-    print("\nClosing application...")
+    logger.info("Closing application...")
     QtWidgets.QApplication.quit()
 
 
@@ -34,6 +35,8 @@ def setup_gui(
 
 
 def main():
+    logger.info("Starting WaVeS application")
+    
     # Set up signal handling for Ctrl+C
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -48,18 +51,22 @@ def main():
     timer.timeout.connect(lambda: None)  # Let the interpreter run each 500 ms
 
     config_path = Path.home() / "AppData/Roaming/WaVeS"
+    logger.debug(f"Using config path: {config_path}")
     config_manager = ConfigManager(
         config_path, Path.cwd() / "resources" / "default_mapping.yml"
     )
 
     try:
         config_manager.load_config()
+        logger.info("Configuration loaded successfully")
     except FileNotFoundError:
+        logger.warning("Configuration file not found, creating default configuration")
         config_manager.ensure_config_exists()
         welcome_dialog = WelcomeDialog(config_path)
         
         webbrowser.open(config_path)
 
+    logger.info("Initializing managers and services")
     session_manager = SessionManager()
     mapping_manager = MappingManager()
     microcontroller_manager = MicrocontrollerManager()
@@ -80,6 +87,7 @@ def main():
         volume_thread,
     )
 
+    logger.info("Application started successfully")
     sys.exit(app.exec_())
 
 

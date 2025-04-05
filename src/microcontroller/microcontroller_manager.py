@@ -1,7 +1,6 @@
 import serial
 from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
-
-
+from utils.logger import logger
 class MicrocontrollerManager(MicrocontrollerProtocol):
     def __init__(self) -> None:
         self.serial = None
@@ -34,7 +33,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         try:
             values = [float(val) for val in data.split("|")]
         except ValueError:
-            print(f"Invalid data: {data}")
+            logger.warning(f"Invalid data: {data}")
             return None
 
         if len(values) != expected_count:

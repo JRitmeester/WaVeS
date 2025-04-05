@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 import utils.utils as utils
+from utils.logger import logger
 import sys
 import traceback
 
@@ -20,12 +21,13 @@ class ErrorDialog(QDialog):
         """Global exception handler that shows errors in an ErrorDialog"""
         # Get the full traceback as a string
         traceback_str = "".join(traceback.format_exception(exctype, value, tb))
+        
+        # Log the error
+        logger.error(f"Unhandled exception: {str(value)}")
+        logger.debug(f"Full traceback:\n{traceback_str}")
 
         # Create and show the error dialog
         ErrorDialog(str(exctype.__name__), str(value), traceback_str)
-
-        # Also print to console for debugging
-        print("".join(traceback.format_exception(exctype, value, tb)), file=sys.stderr)
 
     @classmethod
     def setup_exception_handling(cls):
