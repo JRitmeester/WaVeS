@@ -5,6 +5,7 @@ from PyQt5.QtGui import QIcon
 import utils.utils as utils
 from core.volume_thread import VolumeThread
 import webbrowser
+from ui.listing_dialog import ListingDialog
 
 
 class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
@@ -74,32 +75,6 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
         software_sessions = self.volume_thread.session_manager.software_sessions
         devices = self.volume_thread.session_manager.devices
 
-        messagebox_text = "Sessions:\n" + "\n".join(
-            sorted([session.name for session in software_sessions])
-        )
-        messagebox_text += "\n\nDevices:\n" + "\n".join(sorted(devices.keys()))
-
-        if self.info_dialog is None:
-            self.info_dialog = QDialog(QtWidgets.QApplication.activeWindow())
-            self.info_dialog.setWindowTitle("Sessions and Devices")
-            self.info_dialog.setMinimumWidth(400)
-            self.info_dialog.setMinimumHeight(300)
-            self.info_dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
-
-            layout = QVBoxLayout()
-            text_edit = QTextEdit()
-            text_edit.setReadOnly(True)
-            layout.addWidget(text_edit)
-
-            close_button = QPushButton("Close")
-            close_button.clicked.connect(self.info_dialog.hide)
-            layout.addWidget(close_button)
-
-            self.info_dialog.setLayout(layout)
-            self.info_dialog.text_edit = text_edit
-
-            # Connect the close event to hide instead of close
-            self.info_dialog.closeEvent = lambda e: self.info_dialog.hide()
-
-        self.info_dialog.text_edit.setText(messagebox_text)
-        self.info_dialog.show()
+        # Create and show the dialog
+        dialog = ListingDialog(software_sessions, devices)
+        dialog.exec_()
