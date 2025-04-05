@@ -23,6 +23,7 @@ class WelcomeDialog(QDialog):
         self.setWindowTitle("Welcome to WaVeS")
         self.setWindowIcon(QIcon(utils.get_icon_path().as_posix()))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setModal(True)
 
         # Create layout
         layout = QVBoxLayout()

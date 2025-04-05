@@ -28,6 +28,7 @@ class ListingDialog(QDialog):
         self.setMinimumWidth(400)
         self.setMinimumHeight(300)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self.setModal(True)
 
         self.setWindowIcon(QIcon(utils.get_icon_path().as_posix()))
         layout = QVBoxLayout()

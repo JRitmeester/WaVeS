@@ -13,6 +13,7 @@ class InfoDialog(QDialog):
         # Set window properties
         self.setWindowTitle(info_title)
         self.setWindowIcon(QIcon(utils.get_icon_path().as_posix()))
+        self.setModal(True)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Create layout
