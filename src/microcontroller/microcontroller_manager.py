@@ -33,7 +33,6 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             return None
         
         try:
-            logger.debug(f"Received from Arduino: {data}")
             values = [float(val) for val in data.split("|")]
         except ValueError:
             logger.warning(f"Invalid data: {data}")
