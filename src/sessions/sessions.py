@@ -231,6 +231,8 @@ class SessionGroup():
             self._volume = 0.5
 
     def set_volume(self, value: float) -> None:
+        """Set the volume for all sessions in the group"""
+        value = max(0, min(value, 1))  # Clamp value to 0-1
         self._volume = value
         for session in self.sessions:
             session.set_volume(value)
