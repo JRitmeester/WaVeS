@@ -1,2 +1,2 @@
-python -m poetry export --without-hashes --format=requirements.txt > requirements.txt
-pyinstaller WaVeS.spec
+poetry export --without-hashes --format=requirements.txt > requirements.txt
+poetry run pyinstaller WaVeS.spec
