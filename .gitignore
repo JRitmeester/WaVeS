@@ -4,3 +4,4 @@
 /build/*
 /dist/*
 pyrightconfig.json
+requirements.txt
