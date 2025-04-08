@@ -7,6 +7,7 @@ from sessions.sessions import (
     SoftwareSession,
     MasterSession,
     SystemSession,
+    SessionGroup,
 )
 from sessions.session_protocol import SessionManagerProtocol
 from config.config_protocol import ConfigManagerProtocol
@@ -118,7 +119,7 @@ def test_get_mapping(mapping_manager, session_manager, config_manager):
     assert isinstance(result, dict)
     assert len(result) == 4  # 4 sliders from config
     assert all(isinstance(key, int) for key in result.keys())
-    assert all(isinstance(value, list) for value in result.values())
+    assert all(isinstance(value, SessionGroup) for value in result.values())
 
 
 def test_create_mappings(mapping_manager, session_manager, config_manager):
@@ -126,18 +127,18 @@ def test_create_mappings(mapping_manager, session_manager, config_manager):
     result = mapping_manager.create_mappings(session_manager, config_manager)
 
     # Test master mapping
-    assert session_manager.master_session in result[0]
+    assert session_manager.master_session in result[0].sessions
     assert session_manager.master_session.is_mapped is True
 
     # Test system mapping
-    assert session_manager.system_session in result[1]
+    assert session_manager.system_session in result[1].sessions
     assert session_manager.system_session.is_mapped is True
 
     # Test device mapping
-    assert any(isinstance(session, Device) for session in result[2])
+    assert any(isinstance(session, Device) for session in result[2].sessions)
 
     # Test software session mapping
-    assert any(session.name == "chrome.exe" for session in result[3])
+    assert any(session.name == "chrome.exe" for session in result[3].sessions)
 
 
 def test_add_single_target_mapping(mapping_manager, session_manager):
@@ -218,5 +219,5 @@ def test_mapping_with_no_sessions(mapping_manager, session_manager, config_manag
     assert isinstance(result, dict)
     assert len(result) == 4
     # Verify master and system mappings still work
-    assert session_manager.master_session in result[0]
-    assert session_manager.system_session in result[1]
+    assert session_manager.master_session in result[0].sessions
+    assert session_manager.system_session in result[1].sessions
