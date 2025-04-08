@@ -137,7 +137,7 @@ class SessionManager(SessionManagerProtocol):
             logger.info(f"Created device session: {device.name}")
 
     def apply_volumes(
-        self, values: list[float], mapping: dict[int, Session], inverted: bool
+        self, values: list[float], mapping: dict[int, list[Session]], inverted: bool
     ) -> None:
         """Apply volume values to the mapped sessions"""
         for index, sessions in mapping.items():
