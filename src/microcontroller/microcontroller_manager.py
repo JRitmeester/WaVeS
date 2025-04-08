@@ -2,8 +2,9 @@ import serial
 from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
 from utils.logger import logger
 class MicrocontrollerManager(MicrocontrollerProtocol):
-    def __init__(self) -> None:
+    def __init__(self, n_sliders: int) -> None:
         self.serial = None
+        self.n_sliders = n_sliders
         self._connected = False
 
     def connect(self, port: str, baudrate: int) -> None:
@@ -42,6 +43,12 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
 
         # Normalize values to 0-1 range
         return [val / 1023 for val in values]
+
+    def write_values(self, values: list[float]) -> None:
+        if len (values) != self.n_sliders:
+            raise ValueError(f"Expected {self.n_sliders} values, got {len(values)}")
+        values = [int(val * 1023) for val in values]
+        self.serial.write(b"|".join(values))
 
     def close(self) -> None:
         if self.serial:

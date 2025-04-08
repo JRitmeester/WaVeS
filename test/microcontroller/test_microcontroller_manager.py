@@ -1,10 +1,5 @@
 import sys
 import os
-
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "src"))
-)
-
 import pytest
 from unittest.mock import patch, MagicMock
 import serial
@@ -13,7 +8,7 @@ from microcontroller.microcontroller_manager import MicrocontrollerManager
 
 @pytest.fixture
 def microcontroller_manager():
-    return MicrocontrollerManager()
+    return MicrocontrollerManager(n_sliders=4)
 
 
 def test_connect(microcontroller_manager: MicrocontrollerManager):
@@ -68,3 +63,4 @@ def test_close(microcontroller_manager: MicrocontrollerManager):
         # Then disconnect
         microcontroller_manager.close()
         assert microcontroller_manager.is_connected is False
+

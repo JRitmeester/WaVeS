@@ -58,9 +58,8 @@ class VolumeThread(QThread):
 
     def run(self):
         logger.info("Entering volume thread event loop...")
-        sliders = int(self.config_manager.get_setting("device.sliders"))
         while self.running:
-            values = self.microcontroller_manager.read_values(sliders)
+            values = self.microcontroller_manager.read_values()
             if not values:
                 continue
 

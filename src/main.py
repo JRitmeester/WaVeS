@@ -69,7 +69,9 @@ def main():
     logger.info("Initializing managers and services")
     session_manager = SessionManager()
     mapping_manager = MappingManager()
-    microcontroller_manager = MicrocontrollerManager()
+
+    n_sliders = int(config_manager.get_setting("device.sliders"))
+    microcontroller_manager = MicrocontrollerManager(n_sliders=n_sliders)
     volume_thread = VolumeThread(
         config_manager=config_manager,
         session_manager=session_manager,
