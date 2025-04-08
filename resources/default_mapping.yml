@@ -1,5 +1,7 @@
-# Windows Setup: Place this file in the same directory as vc.exe
-# For auto-start: Create a shortcut and place it in the Start-up folder
+# To start when booting Windows: Create a shortcut and place it in the Start-up folder
+
+# Application executable names can be found easily by opening the application, going to Task Manager, expanding the dropdown menu for the desired application, right-click on an instance of the app and click "Properties".
+# There, the application executable name should be shown on top. This is the name that WaVeS is looking for.
 
 # Application Mappings
 # - 'master': Controls master volume
