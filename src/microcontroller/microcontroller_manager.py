@@ -31,30 +31,38 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             return None
         if not data:
             return None
-
+        
         try:
+            logger.debug(f"Received from Arduino: {data}")
             values = [float(val) for val in data.split("|")]
         except ValueError:
             logger.warning(f"Invalid data: {data}")
             return None
 
-        if len(values) != self.n_sliders:
-            return None
+        # if len(values) != self.n_sliders:
+        #     return None
 
         # Normalize values to 0-1 range
         return [val / 1023 for val in values]
 
-    def write_values(self, values: list[float]) -> None:
-        """Write values to the microcontroller
-        
+    def send_sync_message(self, values: list[float]) -> None:
+        """Send a sync message to the microcontroller.
+
         Values are normalized to 0-100 and sent as integers. This avoids having to use floats, while still using a normalized range.
+
+        Args:
+            values (list[float]): The current volume values (0-1) to send to the microcontroller.
         """
         if not self._connected or not self.serial:
             return
-
+        
         # Validate the number of values
         if len(values) != self.n_sliders:
             raise ValueError(f"Expected {self.n_sliders} values, got {len(values)}")
+        
+        # Validate value range
+        if not all(0 <= val <= 1 for val in values):
+            raise ValueError("Values must be between 0 and 1")
         
         values = [str(int(val * 100)) for val in values]
         payload = ("<" + "|".join(values) + ">").encode('utf-8')

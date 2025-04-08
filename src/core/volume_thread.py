@@ -42,6 +42,10 @@ class VolumeThread(QThread):
         self._check_timer.timeout.connect(self._check_for_changes)
         self._check_timer.start(session_reload_interval * 1000)
 
+        self._sync_timer = QTimer()
+        self._sync_timer.timeout.connect(self.send_sync_message)
+        self._sync_timer.start(1000)
+
     def _check_for_changes(self):
         """Periodically check for session changes"""
         if self.running and self.session_manager.check_for_changes():
@@ -59,10 +63,6 @@ class VolumeThread(QThread):
     def run(self):
         logger.info("Entering volume thread event loop...")
         while self.running:
-            # Current volume values
-            current_volumes = [session_group.get_volume() for session_group in self.mapping.values()]
-            self.microcontroller_manager.write_values(current_volumes)
-            
             # Read new values from microcontroller
             values = self.microcontroller_manager.read_values()
             if not values:
@@ -71,6 +71,11 @@ class VolumeThread(QThread):
             self.session_manager.apply_volumes(
                 values=values, mapping=self.mapping, inverted=self.inverted
             )
+
+    def send_sync_message(self):
+        """Send a sync message to the microcontroller"""
+        current_volumes = [session_group.get_volume() for session_group in self.mapping.values()]
+        self.microcontroller_manager.send_sync_message(current_volumes)
 
     def stop(self):
         """Stop the thread and clean up resources"""
