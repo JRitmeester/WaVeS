@@ -219,3 +219,23 @@ class Device(AudioDevice, Session):
 
     def mark_as_mapped(self, value: bool):
         self._is_mapped = value
+
+class SessionGroup():
+    def __init__(self, sessions: list[Session]):
+        self.sessions = sessions
+
+        # If there is only one session, the volume is the same as the session. Otherwise, 50% is assigned for simplicity.
+        if len(sessions) == 1:
+            self._volume = sessions[0].get_volume()
+        else:
+            self._volume = 0.5
+
+    def set_volume(self, value):
+        self._volume = value
+        for session in self.sessions:
+            session.set_volume(value)
+
+    def get_volume(self):
+        return self._volume
+    
+    

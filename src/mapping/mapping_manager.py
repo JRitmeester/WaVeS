@@ -1,7 +1,7 @@
 from sessions.session_protocol import SessionManagerProtocol
 from config.config_protocol import ConfigManagerProtocol
 from mapping.mapping_protocol import MappingManagerProtocol
-from sessions.sessions import Session, Device
+from sessions.sessions import Session, Device, SessionGroup
 from utils.logger import logger
 
 class MappingManager(MappingManagerProtocol):
@@ -47,7 +47,8 @@ class MappingManager(MappingManagerProtocol):
                     config_manager,
                 )
 
-        return session_dict
+        session_group_dict = {i: SessionGroup(session_dict[i]) for i in range(sliders)}
+        return session_group_dict
 
     def _add_single_target_mapping(
         self,
