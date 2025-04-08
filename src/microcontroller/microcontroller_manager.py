@@ -18,7 +18,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             ) from e
         logger.info(f"Connected to {port} at {baudrate} baud")
 
-    def read_values(self, expected_count: int) -> list[float] | None:
+    def read_values(self) -> list[float] | None:
         """Read values from the microcontroller and validate them"""
         if not self._connected or not self.serial:
             return None
@@ -38,7 +38,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             logger.warning(f"Invalid data: {data}")
             return None
 
-        if len(values) != expected_count:
+        if len(values) != self.n_sliders:
             return None
 
         # Normalize values to 0-1 range
