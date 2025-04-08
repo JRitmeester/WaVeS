@@ -39,7 +39,7 @@ class ListingDialog(QDialog):
         # Create text edit widget
         text_edit_sessions = QTextEdit()
         text_edit_sessions.setReadOnly(True)
-        text_edit_sessions.setText("\n".join(sessions))
+        text_edit_sessions.setText("\n".join([s.name for s in sessions]))
         text_edit_sessions.setMinimumHeight(100)
         text_edit_sessions.setSizeAdjustPolicy(QTextEdit.AdjustToContents)
         layout.addWidget(text_edit_sessions)
