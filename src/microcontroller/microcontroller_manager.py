@@ -45,10 +45,23 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         return [val / 1023 for val in values]
 
     def write_values(self, values: list[float]) -> None:
-        if len (values) != self.n_sliders:
+        """Write values to the microcontroller
+        
+        Values are normalized to 0-100 and sent as integers. This avoids having to use floats, while still using a normalized range.
+        """
+        if not self._connected or not self.serial:
+            return
+
+        # Validate the number of values
+        if len(values) != self.n_sliders:
             raise ValueError(f"Expected {self.n_sliders} values, got {len(values)}")
-        values = [int(val * 1023) for val in values]
-        self.serial.write(b"|".join(values))
+        
+        values = [str(int(val * 100)) for val in values]
+        payload = "|".join(values).encode('utf-8')
+        try:
+            self.serial.write(payload)
+        except serial.SerialException as e:
+            logger.error(f"Error writing values to microcontroller: {e}")
 
     def close(self) -> None:
         if self.serial:

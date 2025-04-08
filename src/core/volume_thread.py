@@ -59,6 +59,11 @@ class VolumeThread(QThread):
     def run(self):
         logger.info("Entering volume thread event loop...")
         while self.running:
+            # Current volume values
+            current_volumes = [session_group.get_volume() for session_group in self.mapping.values()]
+            self.microcontroller_manager.write_values(current_volumes)
+            
+            # Read new values from microcontroller
             values = self.microcontroller_manager.read_values()
             if not values:
                 continue
