@@ -1,6 +1,8 @@
 import serial
 from microcontroller.microcontroller_protocol import MicrocontrollerProtocol
 from utils.logger import logger
+
+
 class MicrocontrollerManager(MicrocontrollerProtocol):
     def __init__(self, n_sliders: int) -> None:
         self.serial = None
@@ -31,15 +33,15 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             return None
         if not data:
             return None
-        
+
         try:
             values = [float(val) for val in data.split("|")]
         except ValueError:
             logger.warning(f"Invalid data: {data}")
             return None
 
-        # if len(values) != self.n_sliders:
-        #     return None
+        if len(values) != self.n_sliders:
+            return None
 
         # Normalize values to 0-1 range
         return [val / 1023 for val in values]
@@ -54,17 +56,17 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
         """
         if not self._connected or not self.serial:
             return
-        
+
         # Validate the number of values
         if len(values) != self.n_sliders:
             raise ValueError(f"Expected {self.n_sliders} values, got {len(values)}")
-        
+
         # Validate value range
         if not all(0 <= val <= 1 for val in values):
             raise ValueError("Values must be between 0 and 1")
-        
+
         values = [str(int(val * 100)) for val in values]
-        payload = ("<" + "|".join(values) + ">").encode('utf-8')
+        payload = ("<" + "|".join(values) + ">").encode("utf-8")
         try:
             self.serial.write(payload)
         except serial.SerialException as e:
