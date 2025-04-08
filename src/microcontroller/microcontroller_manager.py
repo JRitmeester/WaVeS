@@ -57,7 +57,7 @@ class MicrocontrollerManager(MicrocontrollerProtocol):
             raise ValueError(f"Expected {self.n_sliders} values, got {len(values)}")
         
         values = [str(int(val * 100)) for val in values]
-        payload = "|".join(values).encode('utf-8')
+        payload = ("<" + "|".join(values) + ">").encode('utf-8')
         try:
             self.serial.write(payload)
         except serial.SerialException as e:
