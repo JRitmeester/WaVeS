@@ -1,4 +1,7 @@
 # WaVeS
+<p align="center">
+  <img src="https://github.com/JRitmeester/WaVeS/blob/main/WaVeS.png" width="500px">
+</p>
 
 WaVeS (Windows Volume Sliders) is a Python app that interfaces with a microcontroller that sends volume slider data over a serial connection to control the volume of applications in Windows.
 
