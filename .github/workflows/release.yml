@@ -38,7 +38,13 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
-
+        
+      - name: (debug) Preview version bump
+        shell: bash
+        run: |
+          echo ">>> semantic-release version --no-push --skip-build"
+          poetry run semantic-release version --no-push --skip-build || echo "No version bump detected"
+      
       - name: Run Semantic Release
         shell: bash
         run: poetry run semantic-release publish
