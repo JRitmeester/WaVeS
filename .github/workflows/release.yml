@@ -45,10 +45,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        - name: Upload executable to GitHub Release
+      - name: Upload executable to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
             files: dist/WaVeS.exe
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
