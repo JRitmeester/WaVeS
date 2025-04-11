@@ -28,6 +28,7 @@ jobs:
         run: poetry run pip install pyqt5
 
       - name: Build executable
+        shell: cmd
         run: build.bat
 
       - name: Upload .exe to GitHub Release
