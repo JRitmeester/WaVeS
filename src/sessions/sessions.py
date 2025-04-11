@@ -21,29 +21,29 @@ class Session(ABC):
 
     @property
     @abstractmethod
-    def name(self):
+    def name(self) -> str:
         pass
 
     @property
     @abstractmethod
-    def unique_name(self):
+    def unique_name(self) -> str:
         pass
 
     @property
     @abstractmethod
-    def is_mapped(self):
+    def is_mapped(self) -> bool:
         pass
 
     @abstractmethod
-    def set_volume(self, value):
+    def set_volume(self, value: float):
         pass
 
     @abstractmethod
-    def get_volume(self):
+    def get_volume(self) -> float:
         pass
 
     @abstractmethod
-    def mark_as_mapped(self, value: bool):
+    def mark_as_mapped(self, value: bool) -> None:
         pass
 
 
@@ -69,15 +69,15 @@ class SoftwareSession(Session):
         return self._is_mapped
 
     def __repr__(self):
-        return f"Session(unique_name={self.unique_name})"
+        return f"SoftwareSession(unique_name={self.unique_name})"
 
-    def set_volume(self, value):
+    def set_volume(self, value: float) -> None:
         self.volume.SetMasterVolume(value, None)
 
-    def get_volume(self):
+    def get_volume(self) -> float:
         return self.volume.GetMasterVolume()
 
-    def mark_as_mapped(self, value: bool):
+    def mark_as_mapped(self, value: bool) -> None:
         self._is_mapped = value
 
 
@@ -105,13 +105,13 @@ class MasterSession(Session):
     def is_mapped(self) -> bool:
         return self._is_mapped
 
-    def set_volume(self, value):
+    def set_volume(self, value: float) -> None:
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
 
-    def get_volume(self):
+    def get_volume(self) -> float:
         return self.volume.GetMasterVolumeLevelScalar()
 
-    def mark_as_mapped(self, value: bool):
+    def mark_as_mapped(self, value: bool) -> None:
         self._is_mapped = value
 
 
@@ -145,13 +145,13 @@ class SystemSession(Session):
     def is_mapped(self) -> bool:
         return self._is_mapped
 
-    def set_volume(self, value):
+    def set_volume(self, value: float) -> None:
         self.volume.SetMasterVolume(value, None)
 
-    def get_volume(self):
+    def get_volume(self) -> float:
         return self.volume.GetMasterVolume()
 
-    def mark_as_mapped(self, value: bool):
+    def mark_as_mapped(self, value: bool) -> None:
         self._is_mapped = value
 
 
@@ -211,11 +211,33 @@ class Device(AudioDevice, Session):
     def is_mapped(self) -> bool:
         return self._is_mapped
 
-    def set_volume(self, value):
+    def set_volume(self, value: float) -> None:
         self.volume.SetMasterVolumeLevelScalar(value, None)  # Decibels for some reason
 
-    def get_volume(self):
+    def get_volume(self) -> float:
         return self.volume.GetMasterVolumeLevelScalar()
 
-    def mark_as_mapped(self, value: bool):
+    def mark_as_mapped(self, value: bool) -> None:
         self._is_mapped = value
+
+class SessionGroup():
+    def __init__(self, sessions: list[Session]):
+        self.sessions = sessions
+
+        # If there is only one session, the volume is the same as the session. Otherwise, 50% is assigned for simplicity.
+        if len(sessions) == 1:
+            self._volume = sessions[0].get_volume()
+        else:
+            self._volume = 0.5
+
+    def set_volume(self, value: float) -> None:
+        """Set the volume for all sessions in the group"""
+        value = max(0, min(value, 1))  # Clamp value to 0-1
+        self._volume = value
+        for session in self.sessions:
+            session.set_volume(value)
+
+    def get_volume(self) -> float:
+        return self._volume
+    
+    

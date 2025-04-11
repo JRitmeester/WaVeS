@@ -4,6 +4,7 @@ from sessions.sessions import (
     SystemSession,
     Device,
     SoftwareSession,
+    SessionGroup,
 )
 from pycaw.pycaw import AudioUtilities
 from pycaw.constants import AudioDeviceState
@@ -136,13 +137,13 @@ class SessionManager(SessionManagerProtocol):
             self.devices[device.name] = device
             logger.info(f"Created device session: {device.name}")
 
+
     def apply_volumes(
-        self, values: list[float], mapping: dict[int, Session], inverted: bool
+        self, values: list[float], mapping: dict[int, SessionGroup], inverted: bool
     ) -> None:
         """Apply volume values to the mapped sessions"""
-        for index, sessions in mapping.items():
+        for index, session_group in mapping.items():
             volume = values[index]
             if inverted:
                 volume = 1 - volume
-            for session in sessions:
-                session.set_volume(volume)
+            session_group.set_volume(volume)
