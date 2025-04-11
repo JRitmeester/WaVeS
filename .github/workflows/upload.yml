@@ -1,0 +1,38 @@
+name: Upload Executable
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  upload:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Install PyQt5 manually
+        run: poetry run pip install pyqt5
+
+      - name: Build executable
+        run: build.bat
+
+      - name: Upload .exe to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/WaVeS.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
