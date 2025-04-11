@@ -10,6 +10,9 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -48,5 +51,3 @@ jobs:
       - name: Run Semantic Release
         shell: bash
         run: poetry run semantic-release publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
