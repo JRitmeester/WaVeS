@@ -58,10 +58,53 @@ Unassigned apps can be excluded from "unmapped" by assigning those apps to a non
 This will allow you to control all unmapped apps with "unmapped" but exclude Chrome. Why you'd want this, I'm not sure, but it's probably useful in some edge cases.
 
 ## Customisation
-You are free to use the source code. The repository contains a `build.bat` file that will compile the necessary files into an executable in the same directory, including the icon. If you share this project with other parties, please do give credit where appropriate.
+
+### Requirements
+
+- Python 3.11+
+- [Poetry](https://python-poetry.org/) for dependency management
+- A Windows machine (to run and build the executable)
+- Git (obviously)
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/JRitmeester/WaVeS.git
+   cd WaVeS
+   ```
+
+2. Install dependencies with Poetry:
+
+   ```bash
+   poetry install
+   ```
+
+3. Install PyQt5 manually (it's weird and doesn't install cleanly through Poetry sometimes):
+
+   ```bash
+   poetry run pip install pyqt5
+   ```
+
+---
+
+### 🧱 Building the Executable
+
+To build a standalone `.exe`:
+
+```bash
+build.bat
+```
+
+This will:
+- Export dependencies from Poetry
+- Run PyInstaller using `WaVeS.spec`
+- Output `WaVeS.exe` in the `dist/` directory
+
 
 ## Contributing
-In order to clone the project and set it up, you can run `poetry install` which should work for the most part. However PyQt5 is annoying and requires manual installation afterwards using `poetry run pip install pyqt5`.
+Because this is a side project that I already spend more time on than I maybe should, I do currently not accept any unexpected pull requests. If you have an idea or feature request, feel free to open an issue and we can see what we can come up with!
 
 ## License
 [GNU AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)

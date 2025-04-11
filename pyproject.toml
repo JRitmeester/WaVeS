@@ -1,9 +1,29 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.6.0"
+tag_format = "v$version"
+version_files = "src/__init__.py:__version__"
+update_changelog_on_bump = true
+check_dirty = false
+
+[tool.semantic_release]
+version_variable="src/__init__.py:__version__"
+branch="main"
+upload_to_release = true
+build_command = "build.bat"
+
 [tool.poetry]
-name = "waves"
-version = "1.3"
+name = "WaVeS"
+version = "0.0.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["JRitmeester"]
 readme = "README.md"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.files]
+"src/__init__.py" = { pattern = '''^__version__ = ["'](?P<base>(?P<version>[^"']+))["']''' }
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
@@ -17,11 +37,12 @@ pydantic = "^2.11.2"
 black = "^25.1.0"
 pytest = "^8.3.5"
 pyinstaller = "^6.12.0"
+poetry-dynamic-versioning = "^1.8.2"
+python-semantic-release = "^9.21.0"
+pre-commit = "^4.2.0"
 
 [tool.pytest.ini_options]
-pythonpath = [
-    "."
-]
+pythonpath = ["."]
 
 [build-system]
 requires = ["poetry-core"]
