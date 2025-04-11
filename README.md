@@ -108,3 +108,4 @@ Because this is a side project that I already spend more time on than I maybe sh
 
 ## License
 [GNU AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)
+
