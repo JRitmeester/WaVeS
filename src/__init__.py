@@ -1,5 +1,5 @@
 """
-WaVeS - Volume Control Application
+WaVeS - Windows Volume Sliders
 """
 
-__version__ = "0.1.0"
+__version__ = "1.6.0"

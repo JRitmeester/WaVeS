@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for semantic-release to get full commit history
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Poetry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~\AppData\Local\pypoetry\Cache
+            ~\AppData\Local\pypoetry\venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Poetry (globally)
+        run: pip install poetry
+
+      - name: Enable dynamic versioning plugin
+        run: poetry self add poetry-dynamic-versioning
+
+      - name: Install project dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run Semantic Release
+        shell: bash
+        run: poetry run semantic-release publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Upload executable to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+            files: dist/WaVeS.exe
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

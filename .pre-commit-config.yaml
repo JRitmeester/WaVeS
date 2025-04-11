@@ -1,0 +1,12 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.3.0  # You can pin to latest or use "stable"
+    hooks:
+      - id: black
+        language_version: python3.11
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.15.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
