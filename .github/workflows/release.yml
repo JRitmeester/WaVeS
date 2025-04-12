@@ -40,4 +40,4 @@ jobs:
         shell: bash
         run: |
           echo ">>> Running semantic-release with GitHub token"
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} semantic-release publish
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} semantic-release -vvv publish
