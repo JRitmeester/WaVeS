@@ -52,5 +52,5 @@ jobs:
         shell: bash
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          poetry run semantic-release publish
+          poetry run semantic-release -vvv publish
         
