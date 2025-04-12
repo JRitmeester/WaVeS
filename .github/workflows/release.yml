@@ -50,4 +50,7 @@ jobs:
       
       - name: Run Semantic Release
         shell: bash
-        run: poetry run semantic-release publish
+        run: |
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          poetry run semantic-release publish
+        
