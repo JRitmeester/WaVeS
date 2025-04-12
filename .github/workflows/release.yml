@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -25,32 +24,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Cache Poetry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~\AppData\Local\pypoetry\Cache
-            ~\AppData\Local\pypoetry\venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
 
-      - name: Install Poetry
-        run: pip install poetry
+      - name: Install dev tools
+        run: pip install python-semantic-release
 
-      - name: Enable dynamic versioning plugin
-        run: poetry self add poetry-dynamic-versioning
-
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-        
       - name: (debug) Preview version bump
         shell: bash
         run: |
           echo ">>> semantic-release version --no-push --skip-build"
-          poetry run semantic-release version --no-push --skip-build || echo "No version bump detected"
-      
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} semantic-release version --no-push --skip-build
+
       - name: Run Semantic Release
         shell: bash
         run: |
-          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          poetry run semantic-release -vvv publish
-        
+          echo ">>> Running semantic-release with GitHub token"
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} semantic-release publish
